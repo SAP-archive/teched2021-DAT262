@@ -1,8 +1,16 @@
-# Exercise 1 - Exercise 1 Description
+# Exercise 1 - Prepare the Data
 
 In this exercise, we will create...
 
-## Exercise 1.1 Sub Exercise 1 Description
+## Import the Raw Data<a name="subex1"></a>
+```SQL
+IMPORT FROM CSV FILE 's3-<region>://<access_key>:<secret_key>@<bucket_name>/AIS_2017_05_Zone16.csv'
+	INTO "AIS_DEMO"."IMPORT"
+	WITH FIELD DELIMITED BY ',' OPTIONALLY ENCLOSED BY '"' threads 20;
+```
+
+## Generate Geometries<a name="subex2"></a>
+## Remove Duplicates<a name="subex3"></a>
 
 After completing these steps you will have created...
 
@@ -11,7 +19,7 @@ After completing these steps you will have created...
 
 2.	Insert this line of code.
 ```abap
-response->set_text( |Hello World! | ). 
+response->set_text( |Hello World! | ).
 ```
 
 
@@ -41,4 +49,3 @@ READ TABLE lt_params REFERENCE INTO DATA(lr_params) WITH KEY name = 'cmd'.
 You've now ...
 
 Continue to - [Exercise 2 - Exercise 2 Description](../ex2/README.md)
-

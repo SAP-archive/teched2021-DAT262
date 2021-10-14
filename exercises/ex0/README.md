@@ -28,11 +28,11 @@ Your HANA database user requires some roles and privileges
 
 The SAP HANA Database Explorer provides a SQL editor, table viewer and data analysis tools, and a simple graph viewer. For a "full experience" we have used the following tools in addition.
 
-**DBeaver**<br>an open source database administration and development tool. You can run the SQL script in DBeaver and get simple spatial visualizations. See Mathias Kemeters blog for [installation instructions](https://blogs.sap.com/2020/01/08/good-things-come-together-dbeaver-sap-hana-spatial-beer/)
+**DBeaver**<br>an open source database administration and development tool. You can run the SQL script in DBeaver and get simple spatial visualizations. See Mathias Kemeters blog for [installation instructions](https://blogs.sap.com/2020/01/08/good-things-come-together-dbeaver-sap-hana-spatial-beer/).
 
 **QGIS**<br>an open source Geographical Information System (GIS). QGIS can connect to SAP HANA and provides great tools for advanced maps. Again, read Mathias' blog to [get it up and running](https://blogs.sap.com/2021/03/01/creating-a-playground-for-spatial-analytics/).
 
-**hana-ml**, Jupyter Notebook<br>we used the python machine learning client for SAP HANA and Jupyter Notebooks to load JSON data into the document store. There is a lot in hana-ml for the data scientist. See [pypi.org](https://pypi.org/project/hana-ml/)
+**hana-ml**, Jupyter Notebook<br>we used the python machine learning client for SAP HANA and Jupyter Notebooks to load JSON data into the document store. There is a lot in hana-ml for the data scientist - see [pypi.org](https://pypi.org/project/hana-ml/)
 
 **Cytoscape**<br>for advanced graph visualization you can pull data from a Graph Workspace into Cytoscape using... Kemeter... name sounds familiar... anyhow, see this post to get an unsupported preview version of the [Cytoscape HANA plug-in](https://blogs.sap.com/2021/09/22/explore-networks-using-sap-hana-and-cytoscape/).
 
