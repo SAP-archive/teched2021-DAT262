@@ -1,10 +1,18 @@
-# Level 1 Heading
+# Getting Started
 
 In this exercise, you will...
 
-## Level 2 Heading
+## Base Data & Demo Scenario<a name="subex1"></a>
 
-After completing these steps you will have....
+In this ...
+
+##  Spatial and Graph Visualizations<a name="subex2"></a>
+
+In this ...
+
+##  Background Material<a name="subex3"></a>
+
+In this ...
 
 1.	Click here.
 <br>![](/exercises/ex0/images/00_00_0010.png)
@@ -22,5 +30,5 @@ After completing these steps you will have....
 
 ## Summary
 
-Now that you have ... 
-Continue to - [Exercise 1 - Exercise 1 Description](../ex1/README.md)
+Now that you have ...
+Continue to - [Exercise 1 - Preparing the Data](exercises/ex1/README.md)

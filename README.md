@@ -6,10 +6,10 @@ This repository contains the material for the SAP TechEd 2021 session called DAT
 
 ## Overview
 
-This session introduces attendees to the multi-model capabilities in SAP HANA Cloud. We will mainly work with data from the Automatic Identification System (AIS), which is basically observations in space and time. In specific, we will process AIS vessel data which is provided by [https://marinecadastre.gov/ais/](https://marinecadastre.gov/ais/). Files covering two months of "Zone 16" (Chicago, Great Lakes) are imported into SAP HANA Cloud and Lon/Lat coordinates are converted to a "real" point geometry.</br>
-In exercises 1-3, the data is processed using standard SQL/spatial functions to 1 check which vessels were crossing boundaries of a national park, 2 derive motion statistics and trajectories of individual vessels, and 3 aggregate observations using spatial clustering techniques.</br>
-We will then calculate routes using graph capabilities (4), this includes the simulated blockage of a ship canal and the identification of a suitable alternative route.</br>
-In exercise 5 and 6, we will show how to use an extension of spatial clustering to derive a "Space-Time Cube". The resulting dataset is then used to forecast traffic on the lake using HANA's built-in "predictive Analysis Library" (PAL).</br>
+This session introduces attendees to the **multi-model** capabilities in SAP HANA Cloud. We will mainly work with data from the Automatic Identification System (**AIS**), which is basically observations in space and time. In specific, we will process AIS vessel data which is provided by [https://marinecadastre.gov/ais/](https://marinecadastre.gov/ais/). Files covering two months of "Zone 16" (Chicago, Great Lakes) are imported into SAP HANA Cloud and Lon/Lat coordinates are converted to a "real" point geometry.</br>
+In exercises 1-3, the data is processed using standard SQL/**spatial functions** to 1 check which vessels were crossing boundaries of a national park, 2 derive motion statistics and trajectories of individual vessels, and 3 aggregate observations using spatial clustering techniques.</br>
+We will then calculate routes using **graph capabilities** (4), this includes the simulated blockage of a ship canal and the identification of a suitable alternative route.</br>
+In exercise 5 and 6, we will show how to use an extension of spatial clustering to derive a "Space-Time Cube". The resulting dataset is then used to forecast traffic on the lake using HANA's built-in "Predictive Analysis Library" (**PAL**).</br>
 ...
 
 ## Requirements
@@ -21,9 +21,9 @@ Most of the spatial and graph related exercises can be run on a SAP HANA Cloud t
 Provide the exercise content here directly in README.md using [markdown](https://guides.github.com/features/mastering-markdown/) and linking to the specific exercise pages, below is an example.
 
 - [Getting Started](exercises/ex0/)
-    - [Base Data & Demo Scenario](exercises/ex0#subex0)
-    - [Spatial and Graph Visualizations](exercises/ex0#subex1)
-    - [Background Material](exercises/ex0#subex2)
+    - [Base Data & Demo Scenario](exercises/ex0#subex1)
+    - [Spatial and Graph Visualizations](exercises/ex0#subex2)
+    - [Background Material](exercises/ex0#subex3)
 - [Exercise 1 - Preparing the Data](exercises/ex1/)
     - [Exercise 1.1 - Importing the Raw Data](exercises/ex1#subex1)
     - [Exercise 1.2 - Generating Geometries](exercises/ex1#subex2)
