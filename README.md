@@ -17,6 +17,7 @@ In exercise 5 and 6, we will show how to use an extension of spatial clustering 
 Most of the spatial and graph related exercises can be run on a SAP HANA Cloud trial instance, but for the PAL and JSON Document Store related capabilities you currently would need to work with a "full" SAP HANA Cloud system.
 
 ## Exercises
+A copy of the demo data and all scripts are located in the [data_and_script folder](exercises/data_and_script).
 
 - [Getting Started](exercises/ex0/)
     - [Base Data & Demo Scenario](exercises/ex0#subex1)
