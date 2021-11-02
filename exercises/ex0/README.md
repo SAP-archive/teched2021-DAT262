@@ -46,4 +46,4 @@ The SAP HANA Database Explorer provides a SQL editor, table viewer and data anal
 
 You are all set...
 
-Continue to - [Exercise 1 - Preparing the Data](../ex1/README.md)
+Continue to - [Exercise 1 - Prepare the Data](../ex1/README.md)

@@ -35,4 +35,4 @@ So, we can see that "Lauren A" has been cruising within the park area between 12
 
 We have seen how to use a basic spatial predicate (ST_Within()) to join two tables. For constructing a route from point observations we have seen how to use ST_MakeLine() to connect each point to its successor.
 
-Continue to - [Exercise 3 - Understand Vessel Motion](exercises/ex3/README.md)
+Continue to - [Exercise 3 - Understand Vessel Motion](../ex3/README.md)

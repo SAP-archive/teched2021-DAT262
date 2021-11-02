@@ -66,4 +66,4 @@ DELETE FROM "AIS_DEMO"."AIS_2017" WHERE "DELETE" = TRUE;
 
 We loaded two large flat files from an S3 bucket, generated geometry columns in the table, and did some clean up. We are now ready to work with the data.
 
-Continue to - [Exercise 2 - Identify Vessels within National Park Boundaries](exercises/ex2/README.md)
+Continue to - [Exercise 2 - Identify Vessels within National Park Boundaries](../ex2/README.md)
