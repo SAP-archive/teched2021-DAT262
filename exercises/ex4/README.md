@@ -1,42 +1,24 @@
-# Exercise 2 - Exercise 2 Description
+# Exercise 4 - Spatial Clustering
 
-In this exercise, we will create...
+In this exercise, we will use spatial clustering techniques to understand density and spatial distribution of AIS observations.
+There a some different techniques to cluster points - (rectangular) grid, hexagon, DBScan, and KMeans. See the [SAP HANA Cloud Spatial Reference](https://help.sap.com/viewer/bc9e455fe75541b8a248b4c09b086cf5/2021_3_QRC/en-US/7eb3c0e6bbf04fc6bcb9809d81533e6f.html).
+For all variants, there is a native SQL syntax: GROUP CLUSTER BY. For hexagon clustering with 400 cells in Y direction it looks like this:
 
-## Exercise 2.1 Sub Exercise 1 Description
-
-After completing these steps you will have created...
-
-1. Click here.
-<br>![](/exercises/ex2/images/02_01_0010.png)
-
-2.	Insert this line of code.
-```abap
-response->set_text( |Hello ABAP World! | ). 
+```SQL
+SELECT ST_CLUSTERID() AS "ID", ST_CLUSTERCELL() AS "SHAPE", COUNT(*) AS C, COUNT(DISTINCT "MMSI") AS "SHIPS"
+	FROM "AIS_DEMO"."AIS_2017"
+	GROUP CLUSTER BY "SHAPE_32616" USING HEXAGON Y CELLS 400;
 ```
 
+We can use spatial clusters to understand the density of cargo vessel observations. We see that cargo ship are manly travelling the north-south route.
+<br>![](images/clustering_cargo.png)
 
+For passenger ships, the distribution looks different - here we see mainly east-west traffic.
 
-## Exercise 2.2 Sub Exercise 2 Description
-
-After completing these steps you will have...
-
-1.	Enter this code.
-```abap
-DATA(lt_params) = request->get_form_fields(  ).
-READ TABLE lt_params REFERENCE INTO DATA(lr_params) WITH KEY name = 'cmd'.
-  IF sy-subrc = 0.
-    response->set_status( i_code = 200
-                     i_reason = 'Everything is fine').
-    RETURN.
-  ENDIF.
-
-```
-
-2.	Click here.
-<br>![](/exercises/ex2/images/02_02_0010.png)
+![](images/clustering_passenger.png)
 
 ## Summary
 
-You've now ...
+We have introduced basic spatial clustering.
 
-Continue to - [Exercise 3 - Excercise 3 ](../ex3/README.md)
+Continue to - [Exercise 5 - Vessel Routes ](../ex5/README.md)
