@@ -107,6 +107,6 @@ The data returned by the ST_CUBE function is displayed below. Cluster cell 32 re
 
 ## Summary
 
-We have explained two SQLScript functions that allow us to run spatio-temporal clustering. We used an orchestration process to merge the results from spatial clustering for multiple timesplices.
+We have explained two SQLScript functions that allow us to run spatio-temporal clustering. We used an orchestration process to merge the results from spatial clustering for multiple timeslices.
 
 Continue to - [Exercise 7 - Predict Traffic ](../ex7/README.md)

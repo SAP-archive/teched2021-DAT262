@@ -41,7 +41,8 @@ A copy of the demo data and all scripts are located in the [data_and_script fold
     - [Exercise 5.3 - Simulate a Canal Blockage and Find Alternative Routes](exercises/ex5#subex3)
 - [Exercise 6 - Spatio-Temporal Clustering](exercises/ex6/)
 - [Exercise 7 - Predict Traffic](exercises/ex7/)
-    - [Exercise 7.1 - Timeseries Forecasting using Massive Auto Exponential Smoothing](exercises/ex7#subex1)
+    - [Exercise 7.1 - Create Space-Time Cube](exercises/ex7#subex1)
+    - [Exercise 7.2 - Timeseries Forecasting using Massive Auto Exponential Smoothing](exercises/ex7#subex2)
 
 ## How to obtain support
 
