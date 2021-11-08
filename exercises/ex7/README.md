@@ -87,4 +87,4 @@ We can the use SAP HANA Database Explorer to analyze the data exposed by the vie
 
 We have used a Space-Time Cube data structure to run timeseries forecast of traffic data. We visualized the forecast using the native charting options of SAP HANA Database Explorer.
 
-Continue to - [Exercise 3 - Excercise 3 ](../ex3/README.md)
+Continue to - [Exercise 8 - Enterprise Search](../ex8/README.md)

@@ -43,6 +43,7 @@ A copy of the demo data and all scripts are located in the [data_and_script fold
 - [Exercise 7 - Predict Traffic](exercises/ex7/)
     - [Exercise 7.1 - Create Space-Time Cube](exercises/ex7#subex1)
     - [Exercise 7.2 - Timeseries Forecasting using Massive Auto Exponential Smoothing](exercises/ex7#subex2)
+- [Exercise 8 - Enterprise Search](exercises/ex8/)
 
 ## How to obtain support
 
