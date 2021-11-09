@@ -5,11 +5,12 @@ In the last exercise we have seen how to construct a path from point observation
 ## Derive Speed, Acceleration, Total Distance, and Total Time<a name="subex1"></a>
 
 We will calculate the basic motion statistics in three steps, using three stacked SQL views for better understanding. In sequence, we will calculate
-<ol><li>the time interval and distance between each pair of consecutive vessel observations: "delta s" and "delta t"</li>
-<li>from "delta s" and "delta t" we will derive the vessel's speed and sum up time and distance</li>
+<ol><li>the time interval and distance between each pair of consecutive vessel observations: "DELTA_S" and "DELTA_T"</li>
+<li>from "DELTA_S" and "DELTA_T" we will derive the vessel's speed and sum up time and distance</li>
 <li>looking at the change in speed, we can calculate acceleration</li></ol>
 
-All the views below make use of window functions where the data is partitioned by "MMSI" (used as the vessel identifier) and ordered by timestamp. In specific, we will use RANK() which returns an order number, and LAG() which provides access to the next record in the ordered partition. See als [docu].
+All the views below make use of window functions where the data is partitioned by "MMSI" (used as the vessel identifier) and ordered by timestamp. In specific, we will use RANK() which returns an order number, and LAG() which provides access to the next record in the ordered partition. Refer to the [HANA Cloud SQL documentation](https://help.sap.com/viewer/7c78579ce9b14a669c1f3295b0d8ca16/Cloud/en-US/20a353327519101495dfd0a87060a0d3.html) for further details.
+
 ```SQL
 -- Step 1: delta s, delta t, ranks, partial lines
 CREATE OR REPLACE VIEW "AIS_DEMO"."V_MOTION_STATS_1" AS (
@@ -24,11 +25,13 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_MOTION_STATS_1" AS (
 );
 SELECT * FROM "AIS_DEMO"."V_MOTION_STATS_1" ORDER BY "TS" ASC;
 ```
-The view above calculates forward and backward rank, the time interval and distance ("DELTA_T" and "DELTA_S") between consecutive observations, and generates a linestring which connects the points. For simplicity reasons, we are analyzing a single ship's movement in a 24h interval. We see that the time interval between two AIS signals is about 70 seconds and the distance is greater that 200 meters at first, but then drops below 200 meters around 10:12.
+
+The view above calculates forward and backward rank, the time interval and distance ("DELTA_T" and "DELTA_S") between consecutive observations, and generates a linestring which connects the points. For simplicity reasons, we are analyzing a single ship's ("MMSI" = 366780000) movement in a 24h interval. We see that the time interval between two AIS signals is about 70 seconds and the distance is greater than 200 meters at first, but then drops below 200 meters around 10:12.
 <br>![](images/step1.png)
 
 
 The next piece of logic calculates the speed in m/s, dividing "DELTA_S" by "DELTA_T", and sums up "DELTA_S" and "DELTA_T" so we understand how long and how far a ship has travelled up to that point.
+
 ```SQL
 -- Step 2: sum up delta s and delta t, calculate speed
 CREATE OR REPLACE VIEW "AIS_DEMO"."V_MOTION_STATS_2" AS (
@@ -40,9 +43,11 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_MOTION_STATS_2" AS (
 SELECT * FROM "AIS_DEMO"."V_MOTION_STATS_2" ORDER BY "TS" ASC;
 ```
 The second view above adds "TOTAL_DISTANCE", "TOTAL_TIMESPAN", and "SPEED_M/S". Looking at line 11 we see that the ship has travelled 2714 meter in 690 seconds, running with a current speed of 3.345 m/sec.
-<br>![](images/step2.png)
+
+![](images/step2.png)
 
 In the last step, we calculate the acceleration, dividing the change in speed by the time interval.
+
 ```SQL
 -- Step 3: calculate acceleration
 CREATE OR REPLACE VIEW "AIS_DEMO"."V_MOTION_STATS_3" AS (
@@ -52,9 +57,11 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_MOTION_STATS_3" AS (
 SELECT * FROM "AIS_DEMO"."V_MOTION_STATS_3" ORDER BY "TS" ASC;
 ```
 So, looking at the first column in the table below we see the ship is decelerating (negative values) when approaching the harbor, reducing the speed from 3.4 m/sec to 1.6 m/sec.
-<br>![](images/step3.png)
 
-Next, we will wrap the logic of the three SQL views above into a single user-defined function. This will allow very flexible filtering - we can simply pass a valid WHERE condition in the parameter i_filter. This filter is applied on our AIS_2017 table using the APPLY_FILTER() function (... strange name for this function, do you agree?). The filtered data "DAT" is the data on which we run our motion statistics logic. The resulting dataset "MS" is then returned by the function.
+![](images/step3.png)
+
+Next, we will wrap the logic of the three SQL views above into a single user-defined function. This will allow very flexible filtering - we can simply pass a valid WHERE condition in the parameter "i_filter". This filter is applied on our AIS_2017 table using the APPLY_FILTER() function (... strange name for this function, do you agree?). The filtered data "DAT" is the data on which we run our motion statistics logic. The resulting dataset "MS" is then returned by the function.
+
 ```SQL
 -- Now, let's wrap the 3-step logic of the SQL views above into a single function
 CREATE OR REPLACE FUNCTION "AIS_DEMO"."F_MOTION_STATS" (IN i_filter NVARCHAR(5000))
@@ -91,12 +98,15 @@ END;
 SELECT * FROM "AIS_DEMO"."F_MOTION_STATS"(' "MMSI" = 366780000 AND "TS" BETWEEN ''2017-06-24 10:00:00'' AND ''2017-06-25 10:00:00'' ');
 SELECT * FROM "AIS_DEMO"."F_MOTION_STATS"(' "VESSELTYPE" = 1004 AND "TS" BETWEEN ''2017-06-01 00:00:00'' AND ''2017-06-07 23:00:00'' ');
 ```
-Here is a how the motion statistics could be visualized in QGIS. The first screenshot shows a vessel's speed (red=fast blue=slow) observed in a 3 hour interval. The second screenshot visualizes "traces" of vessels. The more transparent the line is, the more the observations happened in the past.
-<br>![](images/speed.png)
+
+Here is a how the motion statistics could be visualized in QGIS. The first screenshot shows a vessel's speed (red=fast, blue=slow) observed in a 3 hour interval. The second screenshot visualizes "traces" of vessels. The more transparent the line is, the more the observations happened in the past.
+
+![](images/speed.png)
 <br><br>![](images/trace.png)
 
 As an alternative, we can plot "SPEED_M/S" and "TOTAL_DISTANCE" over time directly in SAP HANA Database Explorer. We see two longer and a shorter period with high speed (peaks in the blue line). Accordingly, the orange line indicates total distance.
-<br>![](images/speed_distance.png)
+
+![](images/speed_distance.png)
 
 We can use the user-defined function "F_MOTION_STATS" as sub-query or derive additional statistics from the result. The below query for example takes the fine granular motion statistics and calculates hourly average and maximum of speed for a 7 day interval.
 ```SQL
@@ -106,12 +116,14 @@ SELECT HOUR("TS"), COUNT(*), COUNT(DISTINCT "MMSI"), AVG("SPEED_M/S"), MAX("SPEE
 	ORDER BY HOUR("TS");
 ```
 We can see that the average speed is highest (4.7 and 4.8 m/sec) in the early PMs, but the maximum speed was observed between 10PM and midnight (>30 m/sec).
-<br>![](images/hourly_stats.png)
+
+![](images/hourly_stats.png)
 
 ## Vessel Trajectories<a name="subex2"></a>
 
-In the last exercise, we generated a vessel's trajectory or route by simply aggregating individual 2-point linestrings into a geometry collection. For pure visualization purposes this might be good enough - QGIS doesn't care if you want it to render a collection of 1000 lines with just a start and an end point, or to render a single linestring with 500 supporting points. However, it is much more appropriate to calculate trajectories as a single geometry based on supporting points with measures, or "M" values. For our vessel trajectories a natural choice for "M" is a timestamp-like measure - we simply take the seconds between the beginning of our dataset and the actual observation.
-A convenient way to construct a linestring from a set of points is to use the STRING_AGG operator to generate a well-known-text (WKT) string from which we can get a geometry. The query below takes the result of the motion statistics table function for 5 vessels, and generates a linestring for each vessel.
+In the last exercise, we generated a vessel's trajectory or route by simply aggregating individual 2-point linestrings into a geometry collection using *ST_CollectAggr()*. For pure visualization purposes this might be good enough - QGIS doesn't care if you want it to render a collection of 1000 lines with just a start and an end point, or to render a single linestring with 500 supporting points. However, it is much more appropriate to calculate trajectories as a single geometry based on supporting points with measures, or "M" values. For our vessel trajectories a natural choice for "M" is a timestamp-like measure - we simply take the seconds between the beginning of our dataset and the actual observation.
+A convenient way to construct a linestring from a set of points is to use the *STRING_AGG* function to generate a Well Known Text (WKT) string from which we can construct a geometry. The query below takes the result of the motion statistics table function for 5 vessels, and generates a linestring for each vessel.
+
 ```SQL
 SELECT "MMSI", ST_GeomFromText(
 		'LineString M('||STRING_AGG(TO_NVARCHAR("SHAPE_32616".ST_X()||' '||"SHAPE_32616".ST_Y()||' '||SECONDS_BETWEEN('2017-05-01 00:00:00', "TS")), ',' ORDER BY "FWD_RANK")||')'
@@ -120,23 +132,28 @@ SELECT "MMSI", ST_GeomFromText(
 	GROUP BY "MMSI"
 	HAVING COUNT(*)>2;
 ```
+
 The screenshot below visualizes the linestring that represents the trajectory of a ferry.
-<br>![](images/traj.png)
+
+![](images/traj.png)
+
 In a similar way we can generate the trajectories of cargo ships in a 7 day interval - different colors indicate different vessels.
-<br>![](images/cargo_traj.png)
+
+![](images/cargo_traj.png)
+
 ... and the same for passenger ships.
-<br>![](images/pass_traj.png)
+
+![](images/pass_traj.png)
 
 ## Dwell Locations and Trip Segments<a name="subex3"></a>
 
-The blue line of the passenger ship in the screenshot above tells us that this ship is going back and forth between the Milwaukee and Muskegon. In this exercise we want to subdivide the trajectory into individual trip segments, i.e. identify dwell locations. We will basically inspect a sliding window of n minutes to find intervals with no or minimal motion. Knowing these "no motion" intervals allows us to split the trajectory into segments.
+The blue line of the passenger ship in the screenshot above tells us that this ship is going back and forth between the Milwaukee and Muskegon. In this section we want to subdivide the trajectory into individual trip segments, i.e. identify dwell locations. We will basically inspect a sliding window of *n* minutes to find intervals with no or minimal motion. Knowing these "no motion" intervals allows us to split the trajectory into segments.
 In the end, we will create a single table function detecting trip segments, but first we will create five stacked views to explain the logic.
-<ol><li>We create sliding windows, joining each observation to the ones within the previous n minutes.</li>
-<li>We then check the sum of the distances between the observations in a window - if less than 100 m, we assign a 'no motion' flag.</li>
-<li>Next, we identify *changes in motion* by comparing each observation to the previous one.</li>
-<li>The change flags are used to subdivide the trajectory into segments.</li>
-<li>Finally, we aggregate the observations by segment.</li>
-</ol>
+1. We create sliding windows, joining each observation to the ones within the previous n minutes
+2. We then check the sum of the distances between the observations in a window - if less than 100 m, we assign a 'no motion' flag
+3. Next, we identify *changes in motion* by comparing each observation to the previous one
+4. The change flags are used to subdivide the trajectory into segments
+5. Finally, we aggregate the observations by segment
 
 ### 1 Sliding Windows
 
@@ -167,8 +184,10 @@ SELECT "MMSI", "TS", "TS2", "SHAPE_32616_2", "DIST_TO_PREV", "DIST"
 	FROM "AIS_DEMO"."V_DWELL_LOC_1_DIST"
 	ORDER BY "MMSI", "TS", "TS2";
 ```
-Query 1 returns for each observation (the highlighted one at 16:53:03) the previous ones up 5 minutes (see column "TS2" - ranging from 16:48:48 to 16:53:03). "DIST_TO_PREV" contains the spatial distance to the previous observation (17 - 51 meters). We are only interested in the four distances between the observations WITIN one window. This is why "DIST" is 0 for the oldest element in the window.
-<br>![](images/segments_step1.png)
+
+Query 1 returns for each observation (see the highlighted one at 16:53:03) the previous ones up 5 minutes (see column "TS2" - ranging from 16:48:48 to 16:53:03). "DIST_TO_PREV" contains the spatial distance to the previous observation (17 - 51 meters). We are only interested in the four distances *between* the observations WITHIN one window - this is why "DIST" is 0 for the oldest element in the window (line 356).
+
+![](images/segments_step1.png)
 
 ### 2 Sum up Distances, Motion
 
@@ -188,8 +207,10 @@ SELECT "MMSI", "TS", "SHAPE_32616", "NUM_OBS_IN_INTERVAL", "SUM_DIST", "MOTION"
 	FROM "AIS_DEMO"."V_DWELL_LOC_2_DIST"
 	ORDER BY "MMSI", "TS" ASC;
 ```
-Query 2 aggregates the windows. For our observation at 16:53:03 we see that there are 5 observation in the last 5 minutes, resulting in a cumulative distance of 98.7m. Since this is below the threshold (100m), the flag is set to "no motion".
-<br>![](images/segments_step2.png)
+
+Query 2 aggregates the windows. For our observation at 16:53:03 we see that there are 5 observations in the last 5 minutes, resulting in a cumulative distance of 98.7m. Since this is below the threshold (100m), the flag is set to "no motion".
+
+![](images/segments_step2.png)
 
 ### 3 Motion Change
 
@@ -206,8 +227,10 @@ SELECT "MMSI", "TS", "MOTION", "MOTION_CHANGE", "SHAPE_32616"
 	FROM "AIS_DEMO"."V_DWELL_LOC_3_DIST"
 	ORDER BY "MMSI", "TS" ASC;
 ```
-As the "MOTION" flag changes from 'motion' to 'no motion' at 16:53:03 we set a "MOTION_CHANGE" flag 'stopped'
-<br>![](images/segments_step3.png)
+
+As the "MOTION" flag changes from 'motion' to 'no motion' at 16:53:03 we set a "MOTION_CHANGE" flag 'stopped'.
+
+![](images/segments_step3.png)
 
 ### 4 Trip Segments
 
@@ -222,7 +245,8 @@ SELECT "MMSI", "TS", "MOTION", "MOTION_CHANGE", "TRIP_SEGMENT", "SHAPE_32616"
 	ORDER BY "MMSI", "TS" ASC;
 ```
 In step 4 we just count the "MOTION_CHANGE" markers to generate a "TRIP_SEGMENT" number. At 16:53:03 trip segment 1 begins.
-<br>![](images/segments_step4.png)
+
+![](images/segments_step4.png)
 
 ### 5 Aggregation by Segment
 
@@ -236,12 +260,15 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_DWELL_LOC_5_DIST" AS (
 );
 SELECT * FROM "AIS_DEMO"."V_DWELL_LOC_5_DIST" ORDER BY "MMSI", "TRIP_SEGMENT" ASC;
 ```
+
 In the last step we simply sum up some values by trip segment. Line 2 contains the values for the 'no motion' segment that starts at 16:53:03. There are 651 observation in that segment, with a maximum of 98.7m cumulative motion distance within 5 minutes.
-<br>![](images/segments_step5.png)
+
+![](images/segments_step5.png)
 
 ### Steps 1-5 in a single table function
 
 We can wrap the 5 simple steps from above in a single table function, so we can call it in the same flexible manner as our motion statistics above.
+
 ```SQL
 -- Wrap steps 1-5 in a function, so we can call it with a filter clause
 CREATE OR REPLACE FUNCTION "AIS_DEMO"."F_TRIP_SEGMENTS_DIST" (IN i_filter NVARCHAR(5000), IN i_intervalMin INT, IN i_distanceThreshold DOUBLE)
@@ -284,11 +311,13 @@ END;
 
 SELECT * FROM "AIS_DEMO"."F_TRIP_SEGMENTS_DIST"(' "MMSI" = 367341010 ', 8, 80);
 ```
+
 The QGIS map below display the analysis for a single vessel's two months of motion. The different colors indicate different trip segments.
-<br>![](images/segments_single_vessel.png)
+
+![](images/segments_single_vessel.png)
 
 ## Summary
 
-A lot of code in the exercise... we have seen how to calculate motion statistics like speed and acceleration from raw AIS observations, and how to concatenate trajectories from the sequence of points. Finally, we have examined the logic of finding dwell/stop locations and trip segmentation.
+A lot of code in the exercise... we have seen how to calculate motion statistics like speed and acceleration from raw AIS observations, and how to concatenate trajectories from the sequence of points. Finally, we have examined the logic for finding dwell/stop locations and trip segmentation.
 
 Continue to - [Exercise 4 - Spatial Clustering ](../ex4/README.md)

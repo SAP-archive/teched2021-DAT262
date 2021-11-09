@@ -1,6 +1,6 @@
 # Exercise 5 - Vessel Routes
 
-In this exercise, we make use of the HANA Graph engine to find suitable routes for cargo ships. The graph engine operates on networks, represented by vertices and edges. Since there is no "street network" on lake Michigan, we will use the AIS data to generate a network - think of it as a set of edges on which ships travel. We then will find a least-cost path from Menominee to Chicago for a cargo ship. At last, we will simulate a blockage - we will "disrupt" the network and calculate an alternative route.
+In this exercise, we make use of the HANA Graph engine to find suitable routes for cargo ships. The graph engine operates on networks, represented by vertices and edges. Since there is no "street network" on lake Michigan, we will use the AIS data to generate a network - think of it as a set of edges on which ships usually travel. We then will find a least-cost path from Menominee to Chicago for a cargo ship. At last, we will simulate a blockage - we will "disrupt" the network and calculate an alternative route.
 
 ## Generate a Network for Path Finding<a name="subex1"></a>
 
@@ -27,7 +27,7 @@ SELECT ST_CLUSTERID() AS "ID", ST_CLUSTERCELL() AS "HEXAGON", ST_CLUSTERCELL().S
 	INTO "AIS_DEMO"."ROUTE_NETWORK_VERTICES" ("ID", "HEXAGON", "CENTROID", "C", "SHIPS", "SOG");
 ```
 
-We want to find routes for cargo ships especially. So, if the cluster cell is on a frequent cargo route, we set a CARGO_FACTOR. For this, we are re-using the results from the cargo ship clustering we ran in the previous exercise. The higher the number of cargo ships observed in a cluster cell, the lower the cargo fact will be: 1/number of ships. The "CARGO_FACTOR" will then be used in a cost function to calculate a least-cost path... i.e. a path that favors established cargo routes.
+We want to find routes for cargo ships especially. So, if the cluster cell is on a frequent cargo route, we set a "CARGO_FACTOR". For this, we are re-using the results from the cargo ship clustering we ran in the previous exercise. The higher the number of cargo ships observed in a cluster cell, the lower the cargo fact will be: 1/number of ships. The "CARGO_FACTOR" will then be used in a cost function to calculate a least-cost path... i.e. a path that *favors* established cargo routes.
 
 So, let's update the network vertices "CARGO_FACTOR" column.
 
@@ -95,7 +95,7 @@ WITH C AS (
 ;
 ```
 
-With this view, we can generate the data for the edges and store them in the table "ROUTE_NETWORK_EDGES". The edges have attributes we will use for path finding later, e.g. the "AVG_CARGO_FACTOR", which is the average of the cargo factors assigned to the source and target vertex.
+With this view, we can generate the edges connecting two adjacent hexagons and store them in the table "ROUTE_NETWORK_EDGES". The edges have attributes which we will use for path finding later, e.g. the "AVG_CARGO_FACTOR", which is the average of the cargo factors assigned to the source and target vertex.
 
 ````SQL
 -- Create the edges table
@@ -126,11 +126,11 @@ SELECT "SOURCE", "TARGET", ST_MAKELINE(C1."SHAPE_32616".ST_CENTROID(), C2."SHAPE
 SELECT MIN("AVG_CARGO_FACTOR"),MAX("AVG_CARGO_FACTOR") FROM "AIS_DEMO"."ROUTE_NETWORK_EDGES";
 ````
 
-Below we see the network edges - red color indicates segment which are frequently travelled by cargo ships.
+Below we see the network's edges - red color indicates segments which are frequently travelled by cargo ships.
 
 ![](images/edges.png)
 
-The last thing we need to do is to create a so-called graph workspace. you can think of it as a kind of view which tells the HANA graph engine where the data is - we just point to the two tables we created above: "ROUTE_NETWORK_EDGES" and "ROUTE_NETWORK_VERTICES".
+The last thing we need to do is to create a so-called graph workspace. You can think of it as a kind of view which tells the HANA graph engine where the data is - we just point to the two tables we created above: "ROUTE_NETWORK_EDGES" and "ROUTE_NETWORK_VERTICES".
 
 ````SQL
 -- Create a graph workspace
@@ -141,7 +141,7 @@ CREATE GRAPH WORKSPACE "AIS_DEMO"."ROUTE_NETWORK_GRAPH"
 
 ## Use Shortest Path with a Custom Cost Function<a name="subex2"></a>
 
-Having defined a graph workspace, we can leverage the GRAPHScript programming language to create database procedures and functions. The function below takes a START and END vertex, and calculates a least-cost path based on a custom cost function. The cost function takes the length and the cargo_factor into account. Essentially, it tries to balance between a shortest path (in terms of spatial distance) and a suitable path (in terms of where cargo ships usually go). Note that the path algorithm stops when edges are "BLOCKED". Currently, no edges are blocked, but we will later update the graph and simulate a blockage.
+Having defined a graph workspace, we can leverage the *GraphScript* programming language to create database procedures and functions. The function below takes a START and END vertex, and calculates a least-cost path based on a custom cost function. The cost function takes the length and the "CARGO_FACTOR" into account. Essentially, it tries to balance between a shortest path (in terms of spatial distance) and a suitable path (in terms of where cargo ships usually go). Note that the path algorithm stops when edges are "BLOCKED". Currently, no edges are blocked, but we will later update the graph and simulate a blockage.
 
 ````SQL
 -- SP function
@@ -168,7 +168,7 @@ The calculated route from Menominee to Chicago is depicted below. Note that the 
 
 ## Simulate a Canal Blockage and Find Alternative Routes<a name="subex3"></a>
 
-We will now simulate a blockage at Sturgeon Bay - maybe the bridge needs maintenance or a ship is stuck. To do so, we update the "ROUTE_NETWORK_EDGES" table and set "BLOACKED" = TRUE for all edges near Sturgeon Bay.
+We will now simulate a blockage at Sturgeon Bay - maybe the bridge needs maintenance or a ship is stuck. To do so, we update the "ROUTE_NETWORK_EDGES" table and set "BLOCKED" = TRUE for all edges near Sturgeon Bay.
 
 ````SQL
 UPDATE "AIS_DEMO"."ROUTE_NETWORK_EDGES"
