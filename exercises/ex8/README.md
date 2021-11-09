@@ -1,6 +1,6 @@
 # Exercise 8 - Enterprise Search
 
-In this exercise, we will quickly introduce "Enterprise Search" (ESH). ESH is an integral part of SAP HANA and there is a development kit for a search proxy and search UI. We will first create a search model, run a couple of search queries, and finally see the search UI in action. For more details see the [SAP HANA Cloud Search Developer Guide](https://help.sap.com/viewer/05c9edaee7fe4d28ab3627d0b1583df6/latest/en-US) and the [Development Kit Typescript](https://github.wdf.sap.corp/EnterpriseSearch/development-kit-typescript).
+In this exercise, we will quickly introduce "Enterprise Search" (ESH) which is an integral part of SAP HANA. We will first create a search model, run a couple of search queries, and finally see a search UI in action. For more details see the [SAP HANA Cloud Search Developer Guide](https://help.sap.com/viewer/05c9edaee7fe4d28ab3627d0b1583df6/latest/en-US) and the [Development Kit Typescript](https://github.wdf.sap.corp/EnterpriseSearch/development-kit-typescript).
 
 ## Create a Search Model<a name="subex1"></a>
 
@@ -129,11 +129,13 @@ Search queries can be run via the built-in procedure "ESH_SEARCH" and use ODATA 
 CALL SYS.ESH_SEARCH('[ "/v20411/$all?$filter=Search.search(query=''ann'')" ]', ?);
 ````
 
-Using the development kit, the result look like this in the search UI.
+Leveraging the development kit, we can bring up a search UI and interact with the data in a convenient way. We first search for "ann" in our vessel data.
 
 ![](images/search_list.png)
 
-<br>![](images/search_map.png)
+Then we filter for "Pleasure Crafts" and bring the result on a map.
+
+![](images/search_map.png)
 
 ## Summary
 

@@ -1,6 +1,6 @@
 # Exercise 7 - Predict Traffic
 
-In this exercise, we will leverage the data create by spatio-temporal clustering to forecast the traffic for each individual cluster cell. For each cluster cell we have historic traffic observations binned into 4h intervals. We will use PAL (Massive) Auto Exponential Smoothing, which runs Exponential Smoothing for each cluster cell and chooses the most accurate Exponential Smoothing variant automatically. The result yields a traffic prediction for 12 4h intervals.
+In this exercise, we will leverage the data created by spatio-temporal clustering to forecast the traffic for each individual cluster cell. For each cluster cell we have historic traffic observations binned into 4h intervals. We will use PAL (Massive) *Auto Exponential Smoothing*, which runs Exponential Smoothing for each cluster cell and chooses the most accurate exponential smoothing variant automatically. The result yields a traffic prediction for twelve 4h intervals.
 
 ## Create Space-Time Cube<a name="subex1"></a>
 
@@ -79,7 +79,7 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_UES_FORECAST" AS (
 );
 ````
 
-We can the use SAP HANA Database Explorer to analyze the data exposed by the view. We see the observed traffic (blue) and the forecast (orange) for the cluster cell 562 (Chicago) and 4h intervals.
+We can then use SAP HANA Database Explorer to analyze the data exposed by the view. We see the observed traffic (blue) and the forecast (orange) for the cluster cell 562 (Chicago) and 4h intervals.
 
 ![](images/forecast.png)
 

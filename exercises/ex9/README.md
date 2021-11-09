@@ -1,6 +1,6 @@
 # Exercise 9 - Document Store and Graph
 
-In this exercise, we will work with data from the [GDELT project](https://www.gdeltproject.org/), in specific: the Global Entity Graph (GEG). There is a new GEG package every 15 minutes, which contains entities like persons, organization, locations, and events mentioned in global news. Each 15 minute file contains a JSON document for each analyzed news article. We will download a file, dump it into SAP HANA Cloud JSON Document Store, and create an entity co-occurrence graph which we finally visualize using [Cytoscape](https://cytoscape.org/).
+In this exercise, we will work with data from the [GDELT project](https://www.gdeltproject.org/), in specific: the *Global Entity Graph* (GEG). There is a new GEG package every 15 minutes, which contains entities like persons, organization, locations, and events mentioned in global news. Each 15 minute file contains a JSON document for each analyzed news article. We will download a file, dump it into SAP HANA Cloud JSON Document Store, and create an entity co-occurrence graph which we finally visualize using [Cytoscape](https://cytoscape.org/).
 
 ## Load JSON data via Python Client for Machine Learning (hana-ml)<a name="subex1"></a>
 
@@ -25,7 +25,7 @@ The JSON data in a GDELT GEG file looks like below. For a news article there is 
 }
 ````
 
-We will now import a file covering a 15 minute interval of global news coverage. There are mana ways to import or replicate data in SAP HANA Cloud. A nice one is part of the [Python Client API for machine learning algorithms](https://help.sap.com/doc/1d0ebfe5e8dd44d09606814d83308d4b/2.0.05/en-US/html/index.html). Primarily facilitating the use of PAL algorithms for data scientists, its docstore package contains a function create_collection_from_elements which writes JSON data into a collection in HANA Document Store.
+We will now import a file covering a 15 minute interval of global news coverage. There are many ways to import or replicate data in SAP HANA Cloud. A nice one is part of the [Python Client API for machine learning algorithms](https://help.sap.com/doc/1d0ebfe5e8dd44d09606814d83308d4b/2.0.05/en-US/html/index.html). Primarily facilitating the use of PAL algorithms for data scientists, its docstore package contains a function *create_collection_from_elements* which writes JSON data into a collection in HANA Document Store. The python code below uses this function.
 
 ````Python
 import gzip
@@ -50,7 +50,7 @@ for doc in content:
         jdoc = json.loads(doc.replace('"wikipediaUrl": ,', '"wikipediaUrl": "dummy",'))
         jlist.append(jdoc)
 
-coll = hana_ml.docstore.create_collection_from_elements(
+coll = create_collection_from_elements(
     connection_context = cc,
     schema = schema,
     collection_name = 'GDELT_GEG',
@@ -58,7 +58,7 @@ coll = hana_ml.docstore.create_collection_from_elements(
     )
 ````
 
-Once stored on a HANA collection, we can query the data using SQL.
+Once stored in a HANA collection, we can query the data using SQL.
 
 ````SQL
 SELECT * FROM "AIS_DEMO"."GDELT_GEG" WHERE "lang" = 'en';
@@ -80,7 +80,7 @@ SELECT "url", "lang", E."mid", E."name", E."type", E."avgSalience"
 
 ## Generate a Graph and Visualize in Cytoscape<a name="subex2"></a>
 
-We will now generate a entity co-occurrence graph. Basically, we join each entity to entities mentioned in the same news article. The idea is that if two entities -let's say "China" and "Lancaster University" - are mentioned in the same text, then there is a kind of relationship between these two. We will later visualize these relationships to gain an understanding of "what's in the news?". So let's create a view which identifies these co-occurrences.
+We will now generate a entity co-occurrence graph. Basically, we join each entity to entities mentioned in the same news article. The idea is that if two entities - let's say "China" and "Lancaster University" - are mentioned in the same text, then there is a kind of relationship between these two. We will later visualize these relationships to gain an understanding of "what's in the news?". So let's create a view which identifies these co-occurrences.
 
 ````SQL
 CREATE OR REPLACE VIEW "AIS_DEMO"."V_GEG_EDGES" AS (
@@ -120,7 +120,7 @@ SELECT * FROM "AIS_DEMO"."V_GEG_EDGES" WHERE "SALIENCE" > 0.003
 	INTO "AIS_DEMO"."GDELT_GEG_EDGES"("SOURCE", "SOURCE_NAME", "SOURCE_TYPE", "TARGET", "TARGET_NAME", "TARGET_TYPE", "SALIENCE", "COU");
 ````
 
-And finally, we will create a data structure exposing the vertices of our network. We need to deal with different and language dependent "NAME" for  entities with the same "ID". That's the reason for the MAX("NAME") and MAX("TYPE") - I simply take one of the name/type combinations.
+And finally, we will create a data structure exposing the vertices of our network. We need to deal with different and language dependent "NAME" strings for entities with the same "ID". That's the reason for the MAX("NAME") and MAX("TYPE") - I simply take one of the name/type combinations.
 
 ````SQL
 -- The networks' vertices are simply projected from the V_GEG_EDGES view
@@ -145,9 +145,9 @@ CREATE GRAPH WORKSPACE "AIS_DEMO"."GRAPH_GEG"
 		KEY COLUMN "ID";
 ````
 
-The last thing we are going to do is to visualize the network in Cytoscape. There are rather manual ways to expose the data in HANA to Cytoscape, but the most convenient is (a currently unofficial) plugin - see Mathias Kemeter's blog [Explore Networks using SAP HANA and Cytoscape](https://blogs.sap.com/2021/09/22/explore-networks-using-sap-hana-and-cytoscape/).
+The last thing we are going to do is to visualize the network in Cytoscape. There are rather manual ways to expose the data in HANA to Cytoscape, but the most convenient is a (currently unofficial) plugin - see Mathias Kemeter's blog [Explore Networks using SAP HANA and Cytoscape](https://blogs.sap.com/2021/09/22/explore-networks-using-sap-hana-and-cytoscape/).
 
-In the screenshot below, events are green, persons are yellow, organizations are orange, and locations are lilac. We see
+In the screenshot below, events are green, persons are yellow, organizations are orange, and locations are lilac.
 
 ![](images/cytoscape.png)
 

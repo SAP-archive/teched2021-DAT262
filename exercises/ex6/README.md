@@ -1,6 +1,6 @@
 # Exercise 6 - Spatio-Temporal Clustering
 
-In this exercise, we will extend the Spatial Clustering technique introduced in Exercise 4 by the time dimension. So, our AIS observations will by clustered along a spatial grid (X and Y dimension) and along temporal intervals (Z dimension). So we first generate a spatial grid and then add time slices to it. The resulting 3 dimensional data stucture contains "buckets" of data for each combination of grid cell and time interval. Adding a time dimension allows us to detect seasonality within the timeseries for each grid cell, and to predict future traffic from historic observations.
+In this exercise, we will extend the Spatial Clustering technique introduced in Exercise 4 by the time dimension. Our AIS observations will by clustered along a spatial grid (X and Y dimension) and along temporal intervals (Z dimension). So we first generate a spatial grid and then add time slices to it. The resulting 3 dimensional data stucture contains "buckets" of data for each intersection of grid cell and time interval. Adding a time dimension allows us to detect seasonality within the timeseries for each grid cell, and to predict future traffic from historic observations.
 
 ### Clustering per Timeslice
 
@@ -37,12 +37,11 @@ END;
 ### Orchestration
 
 Next, we create a function that orchestrates a number of steps.
-<ol><li>calculate the spatial extent of our data</li>
-<li>generate hexagon grid</li>
-<li>generate timeslice intervals</li>
-<li>run spatial clustering for each timeslice and merge results</li>
-<li>create the final result, NULL handling, joining additional data</li>
-</ol>
+1. calculate the spatial extent of our data
+2. generate hexagon grid
+3. generate timeslice intervals
+4. run spatial clustering for each timeslice and merge results
+5. create the final result, NULL handling, joining additional data
 
 
 ````SQL
@@ -101,7 +100,7 @@ END;
 SELECT * FROM "AIS_DEMO"."F_CREATE_ST_CUBE"(30, 'INTERVAL 1 DAY') ORDER BY "CLUSTER_ID", "ELEMENT_NUMBER";
 ````
 
-The data returned by the ST_CUBE function is displayed below. Cluster cell 32 represents the area covered by the hexagon. This cluster cell contains a number of elements which are the timeslices. The highlighted row below indicates that "ELEMENT_NUMBER" = 7 corresponds to the time interval starting at 2017-05-07 00:00:00. On this day, in this area, we saw 844 AIS signals from 9 vessels. In total, there were 78158 signals from 91 vessels in this area.
+The data returned by the "CREATE_ST_CUBE" function is displayed below. Cluster cell 32 represents the area covered by the hexagon. This cluster cell contains a number of elements which are the timeslices. The highlighted row below indicates that "ELEMENT_NUMBER" = 7 corresponds to the time interval starting at 2017-05-07 00:00:00. On this day, in this area, we saw 844 AIS signals from 9 vessels. In total, there were 78158 signals from 91 vessels in this area.
 
 ![](images/ST_cube.png)
 
