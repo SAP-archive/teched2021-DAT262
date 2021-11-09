@@ -1,8 +1,8 @@
 # Exercise 1 - Prepare the Data
 
-In this exercise, we will load the data from an Amazon S3 bucket into a HANA table, do some data transformations and clean-up. Alternatively, you can also just import the [database export file export.gz](../data_and_script). This export file contains all the data you need for the subsequent exercises.
+In this exercise, we will load the data from an Amazon S3 bucket into a HANA table, do some data transformations and clean-up. This is optional. Alternatively, you can also just import the [database export file export.gz](../data_and_script) and **start with "Generate Geometries"**. Make sure to run the "CREATE PREDEFINED SPATIAL REFERENCE SYSTEM" statements before you import the data. The data file can be then loaded into your SAP HANA cloud system via the Database Explorer. Just right click the "Catalog" node in the tree on the left and choose "Import Database Objects".
 
-## Import the Raw Data<a name="subex1"></a>
+## Import the Raw Data (optional)<a name="subex1"></a>
 
 ```SQL
 -- Create a database schema
@@ -30,7 +30,7 @@ ALTER TABLE "AIS_DEMO"."AIS_2017" ADD ("ID" BIGINT GENERATED ALWAYS AS IDENTITY 
 
 ## Generate Geometries<a name="subex2"></a>
 
-You may have noticed that the geolocations are stored in two columns with datatype DOUBLE: "LAT" and "LON". We will transform the geolocation to the ST_GEOMETRY datatype, but first we need to created the right Spatial Reference Systems (SRS) in HANA.
+You may have noticed that the geolocations in the table "AIS_DEMO"."AIS_2017" are stored in two columns with datatype DOUBLE - "LAT" and "LON". We will transform the geolocation to the ST_GEOMETRY datatype, but first we need to created the right Spatial Reference Systems (SRS) in HANA.
 
 ```SQL
 -- Add the required spatial reference systems.
@@ -43,9 +43,10 @@ ALTER TABLE "AIS_DEMO"."AIS_2017" ADD ("SHAPE_32616" ST_GEOMETRY(32616));
 UPDATE "AIS_DEMO"."AIS_2017" SET "SHAPE_4269" = ST_GeomFromText('POINT('||LON||' '||LAT||')', 4269);
 UPDATE "AIS_DEMO"."AIS_2017" SET "SHAPE_32616" = "SHAPE_4269".ST_TRANSFORM(32616);
 ```
+
 ## Remove Duplicates<a name="subex3"></a>
 
-There are duplicates in the raw data. For some timestamps and  vessels - identified by the MMSI (Maritime Mobile Service Identity) - there are two identical records in the data. Let's get rid of the duplicates.
+There are duplicates in the raw data. For some timestamps and vessels - identified by "MMSI" (Maritime Mobile Service Identity) - there are two identical records in the data. Let's get rid of the duplicates.
 
 ```SQL
 -- Identify duplicate records
@@ -62,6 +63,9 @@ USING
 DELETE FROM "AIS_DEMO"."AIS_2017" WHERE "DELETE" = TRUE;
 ```
 
+The AIS data looks like this. The "MMSI" column contains the key of the vessel, "TS" is the timestamp and "SHAPE_32616" is the point geometry of the observation.
+
+![](images/data.png)
 ## Summary
 
 We loaded two large flat files from an S3 bucket, generated geometry columns in the table, and did some clean up. We are now ready to work with the data.

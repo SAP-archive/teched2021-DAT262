@@ -1,40 +1,43 @@
 # Getting Started
 
-This section should give you an understanding of the base scenario and base data. Additionally, we will describe the SAP HANA Cloud setup in case you want to run the exercises yourself. As we will process the data using SQL, the SQL editor of SAP HANA Database Explorer (DBX) is sufficient. However, for the "full experience" we recommend DBeaver, QGIS (or Esri ArcGIS Pro) for spatial, cytoscape for graph visualizations, and Jupyter notebooks to work with the hana-ml python library for machine learning. At the end of the section, you will find links to additional information on SAP HANA Cloud Multi-Model.
+This section should give you an understanding of the base scenario and data. Additionally, we will describe the SAP HANA Cloud setup in case you want to run the exercises yourself. As we will process the data using SQL, the SQL editor of SAP HANA Database Explorer (DBX) is sufficient from a tooling perspective. However, for the "full experience" we recommend DBeaver, QGIS (or Esri ArcGIS Pro) for spatial, cytoscape for graph visualizations, and python/Jupyter notebooks to work with the SAP HANA client API for machine learning (hana-ml). At the end of this section, you will find links to additional information on SAP HANA Cloud Multi-Model.
 
 ## Base Data & Demo Scenario<a name="subex1"></a>
 
-**Space-Time observations**, i.e. geo-locations with a timestamp, are found in many scenarios, e.g. transportation and logistics, health and sports (fitness tracker), public security, environmental analysis. The Automatic Identification System (**AIS**) **vessel data** we use in the exercises are such space-time observations. The raw data is collected by the U.S. Coast Guard through an onboard navigation safety device. It has been obtained from [https://marinecadastre.gov/ais/](https://marinecadastre.gov/ais/) and can be downloaded in form of flat files. The data contains Lon/Lat coordinates, a timestamp, and information about the vessel like vesseltype, name, callsign etc. The granularity of the data has been changing in the recent years. For simplicity reasons, we chose to work with data from 2017 (May and June), covering [UTM Zone 16](https://marinecadastre.gov/AIS/AIS%20Documents/UTMZoneMap2014.png), which includes the area around lake Michigan. The processing and analysis patterns described in the exercises include
+**Space-time observations**, i.e. geo-locations with a timestamp, are found in many scenarios, e.g. transportation and logistics, health and sports (fitness tracker), public security, environmental analysis. The Automatic Identification System (**AIS**) **vessel data** we use in most of the exercises are such space-time observations. The raw data is collected by the U.S. Coast Guard through an onboard navigation safety device. It can been obtained from [https://marinecadastre.gov/ais/](https://marinecadastre.gov/ais/) and downloaded in form of flat files. The data contains Lon/Lat coordinates, a timestamp, and information about the vessel like its type, name, callsign etc. The granularity of the data has been changing in the recent years. For simplicity reasons, we chose to work with data from 2017 (May and June), covering [UTM Zone 16](https://marinecadastre.gov/AIS/AIS%20Documents/UTMZoneMap2014.png), which includes the area around Lake Michigan. The processing and analysis patterns described in the exercises include
 <ul>
 <li>identify vessels that went through certain areas
 <li>derive motion statistics like speed, acceleration, and heading
 <li>calculate individual vessel trajectories
-<li>finding suitable alternative routes in case of a blockage
+<li>find suitable alternative routes in case of a blockage
 <li>forecasting traffic based on space-time aggregation
 </ul>
 
-Second scenario using GDLET data...
+For the second scenario we are using data from [GDLET's Global Entity Graph](https://blog.gdeltproject.org/announcing-the-global-entity-graph-geg-and-a-new-11-billion-entity-dataset/) (GEG). We will load the data into SAP HANA JSON Document Store using hana-ml, and create a graph relating **POLE entities** (person, organization, location, event) based on their co-occurrence.
 
 ## SAP HANA Cloud setup<a name="subex2"></a>
 
-Most of the exercises and processing patterns can be run on a free SAP HANA Cloud trial system. To get one, visit [SAP HANA Cloud Trial home](https://www.sap.com/cmp/td/sap-hana-cloud-trial.html). To run timeseries forecasting and work with JSON data using the Document Store, you will need a full SAP HANA Cloud. Make sure to provision PAL and Document Store **!!! LINKS REUQIRED!!!**
-Your HANA database user requires some roles and privileges
-<ul><li>roleAFL PAL EXECUTE to execute PAL algorithms
-<li>sys privCERTIFICATE ADMIN, TRUST ADMIN, IMPORT to prepare and run data uploads from S3
-<li>obj priv ESH_CONFIG and ESH_SEARCH for creating search models and running search queries
+Most of the exercises and processing patterns can be run on a free SAP HANA Cloud trial system. To get one, visit [SAP HANA Cloud Trial home](https://www.sap.com/cmp/td/sap-hana-cloud-trial.html). To run timeseries forecasting using a PAL algorithm and to work with JSON data using the Document Store, you will need a full SAP HANA Cloud. Make sure to enable the **Script Server** and **Document Store**. Refer to [SAP HANA Cloud Administration with SAP HANA Cloud Central](https://help.sap.com/viewer/9ae9104a46f74a6583ce5182e7fb20cb/hanacloud/en-US/e379ccd3475643e4895b526296235241.html) for details.
+
+The HANA database user you work with requires some roles and privileges
+<ul><li>Roles AFL__SYS_AFL_AFLPAL_EXECUTE and AFL__SYS_AFL_AFLPAL_EXECUTE_WITH_GRANT_OPTION to execute PAL algorithms
+<li>System privileges CERTIFICATE ADMIN, TRUST ADMIN, IMPORT to prepare and run data uploads from S3
+<li>Object privileges ESH_CONFIG and ESH_SEARCH for creating search models and running search queries
 </ul>
 
-## DBeaver, QGIS, python, and Cytoscape<a name="subex3"></a>
+## DBeaver, QGIS, hana-ml, Cytoscape, and Enterprise Search<a name="subex3"></a>
 
-The SAP HANA Database Explorer provides a SQL editor, table viewer and data analysis tools, and a simple graph viewer. For a "full experience" we have used the following tools in addition.
+The SAP HANA Database Explorer provides a SQL editor, table viewer and data analysis tools, and a simple graph viewer. For a "full experience" we recommend the following tools in addition.
 
 **DBeaver**<br>an open source database administration and development tool. You can run the SQL script in DBeaver and get simple spatial visualizations. See Mathias Kemeters blog for [installation instructions](https://blogs.sap.com/2020/01/08/good-things-come-together-dbeaver-sap-hana-spatial-beer/).
 
 **QGIS**<br>an open source Geographical Information System (GIS). QGIS can connect to SAP HANA and provides great tools for advanced maps. Again, read Mathias' blog to [get it up and running](https://blogs.sap.com/2021/03/01/creating-a-playground-for-spatial-analytics/).
 
-**hana-ml**, Jupyter Notebook<br>we used the python machine learning client for SAP HANA and Jupyter Notebooks to load JSON data into the document store. There is a lot in hana-ml for the data scientist - see [pypi.org](https://pypi.org/project/hana-ml/)
+**hana-ml**, Jupyter Notebook<br>we used the python machine learning client for SAP HANA and Jupyter Notebooks to load JSON data into the document store. There is a lot more in hana-ml for the data scientist - see [pypi.org](https://pypi.org/project/hana-ml/) and [hana-ml reference](https://help.sap.com/doc/1d0ebfe5e8dd44d09606814d83308d4b/2.0.05/en-US/html/index.html).
 
-**Cytoscape**<br>for advanced graph visualization you can pull data from a Graph Workspace into Cytoscape using... Kemeter... name sounds familiar... anyhow, see this post to get an unsupported preview version of the [Cytoscape HANA plug-in](https://blogs.sap.com/2021/09/22/explore-networks-using-sap-hana-and-cytoscape/).
+**Cytoscape**<br>for advanced graph visualization you can pull data from a Graph Workspace into Cytoscape using an unsupported preview version of the [Cytoscape HANA plug-in](https://blogs.sap.com/2021/09/22/explore-networks-using-sap-hana-and-cytoscape/).
+
+**Enterprise Search** development kit<br>contains a search service and a search UI that can connect to SAP HANA. Refer to the [Enterprise Search Quick Start Guide](https://github.wdf.sap.corp/pages/EnterpriseSearch/getting-started/?rc=1).
 
 ##  Background Material<a name="subex4"></a>
 
