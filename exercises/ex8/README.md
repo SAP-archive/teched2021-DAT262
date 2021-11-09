@@ -139,4 +139,4 @@ Using the development kit, the result look like this in the search UI.
 
 We have introduced Enterprise Search. ESH comprises a model, query interface, and a development kit.
 
-Continue to - [Exercise 9 - Vessel Routes ](../ex9/README.md)
+Continue to - [Exercise 9 - Document Store and Graph](../ex9/README.md)
