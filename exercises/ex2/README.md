@@ -1,11 +1,12 @@
 # Exercise 2 - Identify Vessels within National Park Boundaries
 
-In this exercise, we will demonstrate a basic "point in polygon" pattern. In our area of interest, there is the Sleeping Bear Dunes National Lakeshore park. We will run some queries to understand which vessels have crossed the park boundaries.
-<br>![](images/national_park.png)
+In this exercise, we will demonstrate a basic "point in polygon" pattern. At Lake Michigan there is the *Sleeping Bear Dunes National Lakeshore* park (depicted as the blue polygons below). We will run some queries to understand which vessels have crossed the park boundaries.
+
+![](images/national_park.png)
 
 ## Use ST_Within(), ST_MakeLine(), and ST_CollectAggr()<a name="subex1"></a>
 
-Let's query the AIS data for observations that are within the park boundaries. We can use the ST_Within() predicate as a join condition, relating the AIS table to the table which contains the park polygon.
+Let's query the AIS data for observations that happened within the park boundaries. We can use the ST_Within() predicate as a join condition, checking if an AIS record is within the parks' boundary. relating the AIS table to the table which contains the park polygon.
 
 ```SQL
 -- How many AIS observations and distinct vessels are located within the park boundaries?
