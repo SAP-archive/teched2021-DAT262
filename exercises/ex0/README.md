@@ -4,16 +4,16 @@ This section should give you an understanding of the base scenario and data. Add
 
 ## Base Data & Demo Scenario<a name="subex1"></a>
 
-**Space-time observations**, i.e. geo-locations with a timestamp, are found in many scenarios, e.g. transportation and logistics, health and sports (fitness tracker), public security, environmental analysis. The Automatic Identification System (**AIS**) **vessel data** we use in most of the exercises are such space-time observations. The raw data is collected by the U.S. Coast Guard through an onboard navigation safety device. It can been obtained from [https://marinecadastre.gov/ais/](https://marinecadastre.gov/ais/) and downloaded in form of flat files. The data contains Lon/Lat coordinates, a timestamp, and information about the vessel like its type, name, callsign etc. The granularity of the data has been changing in the recent years. For simplicity reasons, we chose to work with data from 2017 (May and June), covering [UTM Zone 16](https://marinecadastre.gov/AIS/AIS%20Documents/UTMZoneMap2014.png), which includes the area around Lake Michigan. The processing and analysis patterns described in the exercises include
+**Space-time observations**, i.e. geo-locations with a timestamp, are found in many scenarios, e.g. transportation and logistics, health and sports (fitness tracker), public security, environmental analysis. The Automatic Identification System (**AIS**) **vessel data**, that we use in most of the exercises, is a set of such space-time observations. The raw data is collected by the U.S. Coast Guard through an onboard navigation safety device. It can been obtained from [https://marinecadastre.gov/ais/](https://marinecadastre.gov/ais/) and downloaded in form of flat files. The data contains Lon/Lat coordinates, a timestamp, and information about the vessel like its type, name, callsign etc. The granularity of the data has been changing in the recent years. For simplicity reasons, we chose to work with data from 2017 (May and June), covering [UTM Zone 16](https://marinecadastre.gov/AIS/AIS%20Documents/UTMZoneMap2014.png), which includes the area around Lake Michigan. The processing and analysis patterns described in the exercises include
 <ul>
-<li>identify vessels that went through certain areas
-<li>derive motion statistics like speed, acceleration, and heading
-<li>calculate individual vessel trajectories
-<li>find suitable alternative routes in case of a blockage
-<li>forecasting traffic based on space-time aggregation
+<li>identifying vessels that went through certain areas,
+<li>deriving motion statistics like speed, acceleration, and heading,
+<li>calculating individual vessel trajectories,
+<li>finding suitable alternative routes in case of a blockage and
+<li>forecasting traffic based on space-time aggregation.
 </ul>
 
-For the second scenario we are using data from [GDLET's Global Entity Graph](https://blog.gdeltproject.org/announcing-the-global-entity-graph-geg-and-a-new-11-billion-entity-dataset/) (GEG). We will load the data into SAP HANA JSON Document Store using hana-ml, and create a graph relating **POLE entities** (person, organization, location, event) based on their co-occurrence.
+For the second scenario we are using data from [GDLET's Global Entity Graph](https://blog.gdeltproject.org/announcing-the-global-entity-graph-geg-and-a-new-11-billion-entity-dataset/) (GEG). We will load the data into SAP HANA JSON Document Store using hana-ml, and create a graph for relating **POLE entities** (person, organization, location, event) based on their co-occurrence.
 
 ## SAP HANA Cloud setup<a name="subex2"></a>
 
