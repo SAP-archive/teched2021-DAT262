@@ -1,15 +1,15 @@
 # Exercise 3 - Understand Vessel Motion
 
-In the last exercise we have seen how to construct a path from point observations using ST_MakeLine(). We will now extend this query pattern to also calculate motion statistics like **speed** and **acceleration**. Next we will take a look at individual trajectories of cargo and passenger ships before we identify **dwell locations**, i.e. when ships stop for a period of time before starting the next trip segment.
+In the last exercise we have seen how to construct a path from point observations using `ST_MakeLine()`. We will now extend this query pattern to also calculate motion statistics like **speed** and **acceleration**. Next we will take a look at individual trajectories of cargo and passenger ships before we identify **dwell locations**, i.e. when ships stop for a period of time before starting the next trip segment.
 
 ## Derive Speed, Acceleration, Total Distance, and Total Time<a name="subex1"></a>
 
 We will calculate the basic motion statistics in three steps, using three stacked SQL views for better understanding. In sequence, we will calculate
-<ol><li>the time interval and distance between each pair of consecutive vessel observations: "DELTA_S" and "DELTA_T"</li>
-<li>from "DELTA_S" and "DELTA_T" we will derive the vessel's speed and sum up time and distance</li>
-<li>looking at the change in speed, we can calculate acceleration</li></ol>
+1. the time interval and distance between each pair of consecutive vessel observations: `DELTA_S` and `DELTA_T`
+2. from `DELTA_S` and `DELTA_T` we will derive the vessel's speed and sum up time and distance
+3. looking at the change in speed, we can calculate acceleration
 
-All the views below make use of window functions where the data is partitioned by "MMSI" (used as the vessel identifier) and ordered by timestamp. In specific, we will use RANK() which returns an order number, and LAG() which provides access to the next record in the ordered partition. Refer to the [HANA Cloud SQL documentation](https://help.sap.com/viewer/7c78579ce9b14a669c1f3295b0d8ca16/Cloud/en-US/20a353327519101495dfd0a87060a0d3.html) for further details.
+All the views below make use of window functions where the data is partitioned by `MMSI` (used as the vessel identifier) and ordered by timestamp. In specific, we will use `RANK()` which returns an order number, and `LAG()` which provides access to the next record in the ordered partition. Refer to the [HANA Cloud SQL documentation](https://help.sap.com/viewer/7c78579ce9b14a669c1f3295b0d8ca16/Cloud/en-US/20a353327519101495dfd0a87060a0d3.html) for further details.
 
 ```SQL
 -- Step 1: delta s, delta t, ranks, partial lines
