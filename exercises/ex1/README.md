@@ -61,16 +61,12 @@ There are duplicates in the raw data. For some timestamps and vessels - identifi
 ```SQL
 -- Identify duplicate records
 SELECT "MMSI", "TS", COUNT(*) AS C FROM "AIS_DEMO"."AIS_2017" GROUP BY "MMSI", "TS" HAVING COUNT(*) > 1 ORDER BY C DESC;
--- We'll add a DELETE flag to the records
-ALTER TABLE "AIS_DEMO"."AIS_2017" ADD ("DELETE" BOOLEAN);
--- Then set the flag to TRUE
-MERGE INTO "AIS_DEMO"."AIS_2017"
-USING
-	(SELECT "MMSI", "TS" FROM "AIS_DEMO"."AIS_2017" GROUP BY "MMSI", "TS" HAVING COUNT(*) > 1) AS DUP
-	ON "AIS_DEMO"."AIS_2017"."MMSI" = DUP."MMSI" AND "AIS_DEMO"."AIS_2017"."TS" = DUP."TS"
-	WHEN MATCHED THEN UPDATE SET "AIS_DEMO"."AIS_2017"."DELETE" = TRUE;
--- And finally delete the flagged records
-DELETE FROM "AIS_DEMO"."AIS_2017" WHERE "DELETE" = TRUE;
+
+-- And finally delete them
+DELETE FROM "AIS_DEMO"."AIS_2017" WHERE (MMSI, TS) IN
+(
+	SELECT "MMSI", "TS" FROM "AIS_DEMO"."AIS_2017" GROUP BY "MMSI", "TS" HAVING COUNT(*) > 1
+)
 ```
 
 The screenshot below shows parts of our table `AIS_2017`. The `MMSI` column contains the key of the vessel, `TS` is the timestamp and `SHAPE_32616" is the point geometry of the observation.
