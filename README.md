@@ -15,7 +15,7 @@ In exercises 1-3, the data is processed using standard SQL/**spatial functions**
 We will then calculate routes using **graph capabilities** (4). The exercise includes a simulated blockage of a ship canal and the identification of a suitable alternative route.</br>
 In exercise 5 and 6, we will show how to use an extension of spatial clustering to derive a "Space-Time Cube". The resulting dataset is then used to forecast traffic (7) on the lake using HANA's built-in "Predictive Analysis Library" (**PAL**).</br>
 **Enterprise Search** is the topic of exercise 8. We will create a search model, run some search queries, and see the search UI.
-Finally, **Document Store** is leverage in exercise 9 to ingest data from GDELT's Global Entity Graph and subsequently create a graph workspace which we can use for visualization.
+Finally, **Document Store** is leveraged in exercise 9 to ingest data from GDELT's Global Entity Graph and subsequently create a graph workspace which we can use for visualization.
 
 [image showing data in hana and the tools on top]
 
