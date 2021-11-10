@@ -21,7 +21,7 @@ Finally, **Document Store** is leveraged in exercise 9 to ingest data from GDELT
 
 ## Requirements
 
-Most of the spatial and graph related exercises can be run on a SAP HANA Cloud trial instance, but for the PAL and JSON Document Store related capabilities you currently would need to work with a "full" SAP HANA Cloud system.
+Most of the spatial and graph related exercises can be run on an SAP HANA Cloud trial instance, but for the PAL and JSON Document Store related capabilities you currently would need to work with a "full" SAP HANA Cloud system.
 
 ## Exercises
 A copy of the demo data and all scripts are located in the [data_and_script folder](exercises/data_and_script).
