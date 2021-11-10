@@ -16,9 +16,9 @@ WHERE D."SHAPE_32616".ST_Within(B."SHAPE_32616") = 1;
 ```
 
 Running the above queries tells us that there are 524 AIS observations from 4 ships. Let's take a closer look and understand the time these 4 vessels spent within the park boundaries. We will also construct a simple route from these observation by
-<ol><li>ordering the AIS observations by time using a window function</li>
-<li>creating a linestring for each pair of consecutive points using ST_MakeLine()</li>
-<li>aggregating the linestrings into a single geometry using ST_CollectAggr()</li></ol>
+1. ordering the AIS observations by time using a window function,
+2. creating a linestring for each pair of consecutive points using `ST_MakeLine()` and
+3. aggregating the linestrings into a single geometry using `ST_CollectAggr()`
 
 ```SQL
 -- Which vessels and when? Get the single point observations and construct a simple route.
@@ -34,6 +34,6 @@ So, we can see that "Lauren A" has been cruising within the park area between 12
 
 ## Summary
 
-We have seen how to use a basic spatial predicate (ST_Within()) to join two tables. For constructing a route from point observations we have seen how to use ST_MakeLine() to connect each point to its successor.
+We have seen how to use a basic spatial predicate (`ST_Within()`) to join two tables. For constructing a route from point observations we have seen how to use `ST_MakeLine()` to connect each point to its successor.
 
 Continue to - [Exercise 3 - Understand Vessel Motion](../ex3/README.md)
