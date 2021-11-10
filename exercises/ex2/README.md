@@ -11,8 +11,8 @@ Let's query the AIS data for observations that happened within the park boundari
 ```SQL
 -- How many AIS observations and distinct vessels are located within the park boundaries?
 SELECT COUNT(*), COUNT(DISTINCT "MMSI")
-	FROM "AIS_DEMO"."AIS_2017" AS D, "AIS_DEMO"."PARK_BOUNDARIES" AS B
-	WHERE B."SHAPE_32616".ST_Within(B."SHAPE_32616") = 1;
+FROM "AIS_DEMO"."AIS_2017" AS D, "AIS_DEMO"."PARK_BOUNDARIES" AS B
+WHERE D."SHAPE_32616".ST_Within(B."SHAPE_32616") = 1;
 ```
 
 Running the above queries tells us that there are 524 AIS observations from 4 ships. Let's take a closer look and understand the time these 4 vessels spent within the park boundaries. We will also construct a simple route from these observation by
