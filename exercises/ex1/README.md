@@ -1,6 +1,6 @@
 # Exercise 1 - Prepare the Data
 
-In this exercise, we will load the data from an Amazon S3 bucket into a HANA table, do some data transformations and clean-up. This is optional. Alternatively, you can also just import the 3 database export files from the [data_and_script](../data_and_script/) folder and **start with "Generate Geometries"**. Make sure to run the "CREATE PREDEFINED SPATIAL REFERENCE SYSTEM" statements before you import the data. The database export files can be then loaded into your SAP HANA cloud system via the Database Explorer. Just right click the "Catalog" node in the tree on the left and choose "Import Database Objects".
+In this exercise, we will load the data from an Amazon S3 bucket into a HANA table, do some data transformations and clean-up. This is optional. Alternatively, you can also just import the 3 database export files from the [data_and_script](../data_and_script/) folder and **start with "Generate Geometries"**. Make sure to run the `CREATE PREDEFINED SPATIAL REFERENCE SYSTEM` statements before you import the data. The database export files can then be loaded into your SAP HANA cloud system via the Database Explorer. Just right click the `Catalog` node in the tree on the left and choose `Import Database Objects`.
 
 ## Import the Raw Data (optional)<a name="subex1"></a>
 
@@ -30,7 +30,7 @@ CREATE COLUMN TABLE "AIS_DEMO"."AIS_2017" AS (
 
 ## Generate Geometries<a name="subex2"></a>
 
-If you decided to upload the three database export files as mentioned in the header of this section, you can start the exercises with the script below. One of the things we are doing is to generate a geometries from the two DOUBLE columns "LAT" and "LON" in the table "AIS_DEMO"."AIS_2017". Actually, we will create two geometry columns - one is based on a round-earth spatial reference system (4269), the other one on a uses a projected system (32616). If you want to learn more on spatial reference systems, see the [spatial reference](https://help.sap.com/viewer/bc9e455fe75541b8a248b4c09b086cf5/2021_3_QRC/en-US/d6aaa035191546c38e06f34b3379496d.html).
+If you decided to upload the three database export files as mentioned in the header of this section, you can start the exercises with the script below. One of the things we are doing is to generate geometries from the two `DOUBLE` columns `LAT` and `LON` in the table `"AIS_DEMO"."AIS_2017"`. Actually, we will create two geometry columns - one is based on a round-earth spatial reference system (4269), the other one uses a projected system (32616). If you want to learn more about spatial reference systems, see the [SAP HANA Spatial Documentation](https://help.sap.com/viewer/bc9e455fe75541b8a248b4c09b086cf5/2021_3_QRC/en-US/d6aaa035191546c38e06f34b3379496d.html).
 
 ```SQL
 -- Create a database schema
@@ -56,7 +56,7 @@ UPDATE "AIS_DEMO"."AIS_2017" SET "SHAPE_32616" = "SHAPE_4269".ST_Transform(32616
 
 ## Remove Duplicates<a name="subex3"></a>
 
-There are duplicates in the raw data. For some timestamps and vessels - identified by "MMSI" (Maritime Mobile Service Identity) - there are two identical records in the data. Let's get rid of the duplicates.
+There are duplicates in the raw data. For some timestamps and vessels - identified by "MMSI" (Maritime Mobile Service Identity) - there are two identical records in the data. Let's get rid of these duplicates.
 
 ```SQL
 -- Identify duplicate records
@@ -73,7 +73,7 @@ USING
 DELETE FROM "AIS_DEMO"."AIS_2017" WHERE "DELETE" = TRUE;
 ```
 
-The screenshot below shows parts of our table "AIS_2017". The "MMSI" column contains the key of the vessel, "TS" is the timestamp and "SHAPE_32616" is the point geometry of the observation.
+The screenshot below shows parts of our table `AIS_2017`. The `MMSI` column contains the key of the vessel, `TS` is the timestamp and `SHAPE_32616" is the point geometry of the observation.
 
 ![](images/data.png)
 
