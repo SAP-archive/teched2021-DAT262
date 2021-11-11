@@ -32,7 +32,7 @@ A copy of the demo data and all scripts are located in the [data_and_script fold
     - [DBeaver, QGIS, hana-ml, Cytoscape, and Enterprise Search](exercises/ex0#subex3)
     - [Background Material](exercises/ex0#subex4)
 - [Exercise 1 - Prepare the Data](exercises/ex1/)
-    - [Exercise 1.1 - Import the Raw Data](exercises/ex1#subex1)
+    - [Exercise 1.1 - Import Data](exercises/ex1#subex1)
     - [Exercise 1.2 - Generate Geometries](exercises/ex1#subex2)
     - [Exercise 1.3 - Remove Duplicates](exercises/ex1#subex3)
 - [Exercise 2 - Identify Vessels within National Park Boundaries](exercises/ex2/)

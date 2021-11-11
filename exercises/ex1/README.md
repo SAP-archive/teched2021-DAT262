@@ -6,16 +6,9 @@ In this exercise, we will import the data into a HANA table, do some data transf
 * DAT262_AIS_DEMO_AIS_2017_06_RAW_BINARY.tar.gz
 * DAT262_AIS_DEMO_BOUNDARIES_TEXT.tar.gz
 
-*Before* data import, we need to prepare the HANA system for the spatial data. So open up the SQL Editor in SAP HANA Database Explorer or DBeaver and *run the two statements below*.
+## Import Data<a name="subex1"></a>
 
-```SQL
--- Add the required spatial reference systems.
-CREATE PREDEFINED SPATIAL REFERENCE SYSTEM IDENTIFIED BY 4269;
-CREATE PREDEFINED SPATIAL REFERENCE SYSTEM IDENTIFIED BY 32616;
-
-```
-
-We can now load the data files into SAP HANA cloud using the Database Explorer. Just right click the `Catalog` node in the tree on the left and choose `Import Database Objects`. In the dialog, browse for "DAT262_AIS_DEMO_AIS_2017_05_RAW_BINARY.tar.gz", wait until the file has been inspected, then hit `IMPORT`.
+We can load the data files into SAP HANA cloud using the Database Explorer. Just right click the `Catalog` node in the tree on the left and choose `Import Database Objects`. In the dialog, browse for "DAT262_AIS_DEMO_AIS_2017_05_RAW_BINARY.tar.gz", wait until the file has been inspected, then hit `IMPORT`.
 
 ![](images/imp1.png)
 ![](images/imp2.png)
@@ -23,8 +16,6 @@ We can now load the data files into SAP HANA cloud using the Database Explorer. 
 **Repeat** the import steps for the other two files:
 * "DAT262_AIS_DEMO_AIS_2017_06_RAW_BINARY.tar.gz"
 *  "DAT262_AIS_DEMO_BOUNDARIES_TEXT.tar.gz".
-
-## Merge Tables<a name="subex1"></a>
 
 We had to split the AIS dataset into two files because of file size restrictions on github. We will now merge the data into a single table, so we got all in one place.
 
@@ -39,6 +30,9 @@ SELECT COUNT(*) FROM "AIS_DEMO"."AIS_2017"; --8.4 mio
 
 -- After the copy, we can drop the second table
 DROP TABLE "AIS_DEMO"."AIS_2017_06";
+
+-- Some clients like ArcGIS Pro require a primary key, so let's generate one.
+ALTER TABLE "AIS_DEMO"."AIS_2017" ADD ("ID" BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY);
 ````
 
 The raw data after import and merge should look like this.
@@ -47,11 +41,13 @@ The raw data after import and merge should look like this.
 
 ## Generate Geometries<a name="subex2"></a>
 
-In the table `"AIS_DEMO"."AIS_2017"`, the geo-location is currently encoded by two `DOUBLE` columns `LAT` and `LON`. We will create two geometry columns - one is based on a round-earth spatial reference system (4269), the other one uses a projected system (32616). If you want to learn more about spatial reference systems, see the [SAP HANA Spatial Documentation](https://help.sap.com/viewer/bc9e455fe75541b8a248b4c09b086cf5/2021_3_QRC/en-US/d6aaa035191546c38e06f34b3379496d.html).
+In the table `AIS_DEMO.AIS_2017`, the geo-location is currently encoded by two `DOUBLE` columns `LAT` and `LON`. We will create two geometry columns - one is based on a round-earth spatial reference system (4269), the other one uses a projected system (32616). If you want to learn more about spatial reference systems, see the [SAP HANA Spatial Documentation](https://help.sap.com/viewer/bc9e455fe75541b8a248b4c09b086cf5/2021_3_QRC/en-US/d6aaa035191546c38e06f34b3379496d.html).
 
 ```SQL
--- Some clients like ArcGIS Pro require a primary key, so let's generate one.
-ALTER TABLE "AIS_DEMO"."AIS_2017" ADD ("ID" BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY);
+-- Transform the geo-locations encoded by LAT/LON to a "real" geometry.
+-- We will use two spatial reference systems, let's create these.
+CREATE PREDEFINED SPATIAL REFERENCE SYSTEM IDENTIFIED BY 4269;
+CREATE PREDEFINED SPATIAL REFERENCE SYSTEM IDENTIFIED BY 32616;
 
 -- Add two columns to the data table...
 ALTER TABLE "AIS_DEMO"."AIS_2017" ADD ("SHAPE_4269" ST_GEOMETRY(4269));
