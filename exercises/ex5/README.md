@@ -46,11 +46,11 @@ SELECT * FROM "AIS_DEMO"."ROUTE_NETWORK_VERTICES";
 SELECT MIN(CARGO_FACTOR), MAX(CARGO_FACTOR)
   FROM "AIS_DEMO"."ROUTE_NETWORK_VERTICES";
 ```
-The network vertices table now contains the following data: for each vertex is represented by a hexagon and centroid, along with the number of observations, and the number of distinct ships. The highlighted cell below is an area where cargo ships usually travel... the `CARGO_FACTOR` is 0.111. When calculating routes, this cell will "cost" only 0.111 to traverse, whereas other cells are more costly, thus unlikely to be part of a cargo route.
+The network vertices table now contains the following data: each vertex is represented by a hexagon and centroid, along with the number of observations, and the number of distinct ships. The highlighted cell below is an area where cargo ships usually travel... the `CARGO_FACTOR` is 0.111. When calculating routes, this cell will "cost" only 0.111 to traverse, whereas other cells are more costly, thus unlikely to be part of a cargo route.
 
 ![](images/vertices.png)
 
-Next, we need to create the edges between the vertices, so we have a network on which we can route. As of today, this is a little tricky (but things will improve in the future). We will use a generic parameterized view to generate edges for a give grid size.
+Next, we need to create the edges between the vertices, so we have a network on which we can route. As of today, this is a little tricky (but things will improve in the future). We will use a generic parameterized view to generate edges for a given grid size.
 
 ```SQL
 -- We can  construct the edges between the cluster cells. The query below identifies the neighbors of each cluster cell.
