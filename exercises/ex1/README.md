@@ -1,47 +1,55 @@
 # Exercise 1 - Prepare the Data
 
-In this exercise, we will load the data from an Amazon S3 bucket into a HANA table, do some data transformations and clean-up. This is optional. Alternatively, you can also just import the 3 database export files from the [data_and_script](../data_and_script/) folder and **start with "Generate Geometries"**. Make sure to run the `CREATE PREDEFINED SPATIAL REFERENCE SYSTEM` statements before you import the data. The database export files can then be loaded into your SAP HANA cloud system via the Database Explorer. Just right click the `Catalog` node in the tree on the left and choose `Import Database Objects`.
+In this exercise, we will import the data into a HANA table, do some data transformations and clean-up. The files to import are in the [data_and_script](../data_and_script/) folder:
 
-## Import the Raw Data (optional)<a name="subex1"></a>
+* DAT262_AIS_DEMO_AIS_2017_05_RAW_BINARY.tar.gz
+* DAT262_AIS_DEMO_AIS_2017_06_RAW_BINARY.tar.gz
+* DAT262_AIS_DEMO_BOUNDARIES_TEXT.tar.gz
+
+Before data import, we need to prepare the HANA system for the spatial data. So open up the SQL Editor in SAP HANA Database Explorer or DBeaver and run the two statements below.
 
 ```SQL
--- Create a database schema
-CREATE SCHEMA "AIS_DEMO";
 -- Add the required spatial reference systems.
 CREATE PREDEFINED SPATIAL REFERENCE SYSTEM IDENTIFIED BY 4269;
 CREATE PREDEFINED SPATIAL REFERENCE SYSTEM IDENTIFIED BY 32616;
--- Create a database table for importing the data
-CREATE COLUMN TABLE "AIS_DEMO"."IMPORT" (
-	"MMSI" INT, "TS" TIMESTAMP, "LAT" DOUBLE, "LON" DOUBLE, "SOG" DOUBLE, "COG" DOUBLE, "HEADING" DOUBLE, "VESSELNAME" NVARCHAR(500),
-	"IMO" NVARCHAR(500), "CALLSIGN" NVARCHAR(500), "VESSELTYPE" INT, "STATUS" NVARCHAR(500), "LENGTH" DOUBLE, "WIDTH" DOUBLE, "DRAFT" DOUBLE,
-	"CARGO" INT
-);
--- Data import from S3, example syntax
-IMPORT FROM CSV FILE 's3-<region>://<access_key>:<secret_key>@<bucket_name>/AIS_2017_05_Zone16.csv'
-	INTO "AIS_DEMO"."IMPORT"
-	WITH FIELD DELIMITED BY ',' OPTIONALLY ENCLOSED BY '"' threads 20;
--- We want to work with data from the Lake Michigan area.
--- So, let's copy the relevant data into a single table
-CREATE COLUMN TABLE "AIS_DEMO"."AIS_2017" AS (
-	SELECT * FROM "AIS_DEMO"."IMPORT"
-	WHERE "LAT" BETWEEN 41.25 AND 46.09 AND "LON" BETWEEN -88.57 AND -84.34
-);
+
 ```
+
+We can now load the data files into SAP HANA cloud using the Database Explorer. Just right click the `Catalog` node in the tree on the left and choose `Import Database Objects`. In the dialog, browse for "DAT262_AIS_DEMO_AIS_2017_05_RAW_BINARY.tar.gz", wait until the file has been inspected, then hit `IMPORT`.
+
+![](images/imp1.png)
+![](images/imp2.png)
+
+**Repeat** the import steps for the other two files:
+* "DAT262_AIS_DEMO_AIS_2017_06_RAW_BINARY.tar.gz"
+*  "DAT262_AIS_DEMO_BOUNDARIES_TEXT.tar.gz".
+
+## Merge Tables<a name="subex1"></a>
+
+We had to split the AIS dataset into two files because of file size restrictions on github. We will now merge the data into a single table, so we got all in one place.
+
+````SQL
+-- After the import, there are two tables AIS_DEMO.AIS_2017 and AIS_DEMO.AIS_2017_06
+SELECT COUNT(*) FROM "AIS_DEMO"."AIS_2017"; --3.7 mio
+SELECT COUNT(*) FROM "AIS_DEMO"."AIS_2017_06"; --4.6 mio
+
+-- We copy the data from the second table into the first, so it is all in one place.
+SELECT * FROM "AIS_DEMO"."AIS_2017_06" INTO "AIS_DEMO"."AIS_2017";
+SELECT COUNT(*) FROM "AIS_DEMO"."AIS_2017"; --8.4 mio
+
+-- After the copy, we can drop the second table
+DROP TABLE "AIS_DEMO"."AIS_2017_06";
+````
+
+The raw data after import and merge should look like this.
+
+![](images/data_raw.png)
 
 ## Generate Geometries<a name="subex2"></a>
 
-If you decided to upload the three database export files as mentioned in the header of this section, you can start the exercises with the script below. One of the things we are doing is to generate geometries from the two `DOUBLE` columns `LAT` and `LON` in the table `"AIS_DEMO"."AIS_2017"`. Actually, we will create two geometry columns - one is based on a round-earth spatial reference system (4269), the other one uses a projected system (32616). If you want to learn more about spatial reference systems, see the [SAP HANA Spatial Documentation](https://help.sap.com/viewer/bc9e455fe75541b8a248b4c09b086cf5/2021_3_QRC/en-US/d6aaa035191546c38e06f34b3379496d.html).
+In the table `"AIS_DEMO"."AIS_2017"`, the geo-location is currently encoded by two `DOUBLE` columns `LAT` and `LON`. We will create two geometry columns - one is based on a round-earth spatial reference system (4269), the other one uses a projected system (32616). If you want to learn more about spatial reference systems, see the [SAP HANA Spatial Documentation](https://help.sap.com/viewer/bc9e455fe75541b8a248b4c09b086cf5/2021_3_QRC/en-US/d6aaa035191546c38e06f34b3379496d.html).
 
 ```SQL
--- Create a database schema
-CREATE SCHEMA "AIS_DEMO";
-
--- Add the required spatial reference systems.
-CREATE PREDEFINED SPATIAL REFERENCE SYSTEM IDENTIFIED BY 4269;
-CREATE PREDEFINED SPATIAL REFERENCE SYSTEM IDENTIFIED BY 32616;
-
--- !UPLOAD the three database export files to get your data!
-
 -- Some clients like ArcGIS Pro require a primary key, so let's generate one.
 ALTER TABLE "AIS_DEMO"."AIS_2017" ADD ("ID" BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY);
 
@@ -59,17 +67,17 @@ UPDATE "AIS_DEMO"."AIS_2017" SET "SHAPE_32616" = "SHAPE_4269".ST_Transform(32616
 There are duplicates in the raw data. For some timestamps and vessels - identified by "MMSI" (Maritime Mobile Service Identity) - there are two identical records in the data. Let's get rid of these duplicates.
 
 ```SQL
--- Identify duplicate records
+-- Check for duplicates, i.e. same vessel, same timestamp
 SELECT "MMSI", "TS", COUNT(*) AS C FROM "AIS_DEMO"."AIS_2017" GROUP BY "MMSI", "TS" HAVING COUNT(*) > 1 ORDER BY C DESC;
 
--- And finally delete them
+-- We simply remove the duplicates
 DELETE FROM "AIS_DEMO"."AIS_2017" WHERE (MMSI, TS) IN
 (
 	SELECT "MMSI", "TS" FROM "AIS_DEMO"."AIS_2017" GROUP BY "MMSI", "TS" HAVING COUNT(*) > 1
 )
 ```
 
-The screenshot below shows parts of our table `AIS_2017`. The `MMSI` column contains the key of the vessel, `TS` is the timestamp and `SHAPE_32616" is the point geometry of the observation.
+The screenshot below shows parts of our table `AIS_2017`. The `MMSI` column contains the key of the vessel, `TS` is the timestamp and `SHAPE_32616` is the point geometry of the observation.
 
 ![](images/data.png)
 
