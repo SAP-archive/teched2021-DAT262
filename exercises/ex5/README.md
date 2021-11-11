@@ -9,7 +9,6 @@ Our Network/Graph is made of vertices and edges. First we create the vertices. F
 ```SQL
 -- Let's make a network/graph on which we can calculate routes.
 -- We'll take hexagon clusters as vertices and then calculate edges between.
-DROP TABLE "AIS_DEMO"."ROUTE_NETWORK_VERTICES";
 CREATE COLUMN TABLE "AIS_DEMO"."ROUTE_NETWORK_VERTICES" (
 	"ID" BIGINT PRIMARY KEY,
 	"HEXAGON" ST_GEOMETRY(32616),
@@ -98,7 +97,6 @@ With this view, we can generate the edges connecting two adjacent hexagons and s
 
 ````SQL
 -- Create the edges table
-DROP TABLE "AIS_DEMO"."ROUTE_NETWORK_EDGES";
 CREATE COLUMN TABLE "AIS_DEMO"."ROUTE_NETWORK_EDGES" (
 	"ID" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	"SOURCE" BIGINT NOT NULL,
