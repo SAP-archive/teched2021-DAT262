@@ -2,11 +2,20 @@
 
 In this exercise, we will demonstrate a basic "point in polygon" pattern. At Lake Michigan there is the *Sleeping Bear Dunes National Lakeshore* park (depicted as the blue polygons below). We will run some queries to understand which vessels have crossed the park boundaries.
 
+The park boundaries are in the table `AIS_DEMO.PARK_BOUNDARIES` which we imported in exercise 1.
+
+````SQL
+-- We have a table which contains the boundaries of a national park
+SELECT * FROM "AIS_DEMO"."PARK_BOUNDARIES";
+````
+
+In DBeaver you can visualize the polygon stored in the column `SHAPE_32616` on a map.
+
 ![](images/national_park.png)
 
 ## Use ST_Within(), ST_MakeLine(), and ST_CollectAggr()<a name="subex1"></a>
 
-Let's query the AIS data for observations that happened within the park boundaries. We can use the `ST_Within()` predicate as a join condition, checking if an AIS record is within the parks' boundary. relating the AIS table to the table which contains the park polygon.
+Let's query the AIS data for observations that happened within the park boundaries. We can use the `ST_Within()` predicate as a join condition, checking if an AIS record is within the parks' boundary.
 
 ```SQL
 -- How many AIS observations and distinct vessels are located within the park boundaries?
@@ -30,10 +39,11 @@ SELECT "MMSI", "VESSELNAME", MIN("TS"), MAX("TS"), ST_COLLECTAGGR("SHAPE_32616")
 ) GROUP BY "MMSI", "VESSELNAME";
 ```
 So, we can see that "Lauren A" has been cruising within the park area between 12:42 and 12:52. The aggregation of the point geometries reveals the approximate route.
-<br>![](images/lauren_a.png)
+
+![](images/lauren_a.png)
 
 ## Summary
 
-We have seen how to use a basic spatial predicate (`ST_Within()`) to join two tables. For constructing a route from point observations we have seen how to use `ST_MakeLine()` to connect each point to its successor.
+We have seen how to use a basic spatial predicate `ST_Within()` to join two tables. For constructing a route from point observations we have seen how to use `ST_MakeLine()` to connect each point to its successor.
 
 Continue to - [Exercise 3 - Understand Vessel Motion](../ex3/README.md)

@@ -6,7 +6,7 @@ In this exercise, we will import the data into a HANA table, do some data transf
 * DAT262_AIS_DEMO_AIS_2017_06_RAW_BINARY.tar.gz
 * DAT262_AIS_DEMO_BOUNDARIES_TEXT.tar.gz
 
-Before data import, we need to prepare the HANA system for the spatial data. So open up the SQL Editor in SAP HANA Database Explorer or DBeaver and run the two statements below.
+*Before* data import, we need to prepare the HANA system for the spatial data. So open up the SQL Editor in SAP HANA Database Explorer or DBeaver and *run the two statements below*.
 
 ```SQL
 -- Add the required spatial reference systems.
@@ -83,6 +83,6 @@ The screenshot below shows parts of our table `AIS_2017`. The `MMSI` column cont
 
 ## Summary
 
-We loaded two large flat files from an S3 bucket, generated geometry columns in the table, and did some clean up. We are now ready to work with the data.
+We loaded the raw data, generated geometry columns in the table, and did some clean up. We are now ready to work with the data.
 
 Continue to - [Exercise 2 - Identify Vessels within National Park Boundaries](../ex2/README.md)
