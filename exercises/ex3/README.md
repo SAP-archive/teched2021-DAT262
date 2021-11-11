@@ -26,7 +26,7 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_MOTION_STATS_1" AS (
 SELECT * FROM "AIS_DEMO"."V_MOTION_STATS_1" ORDER BY "TS" ASC;
 ```
 
-The view above calculates forward and backward rank, the time interval and distance ("DELTA_T" and "DELTA_S") between consecutive observations, and generates a linestring which connects the points. For simplicity reasons, we are analyzing a single ship's ("MMSI" = 366780000) movement in a 24h interval. We see that the time interval between two AIS signals is about 70 seconds and the distance is greater than 200 meters at first, but then drops below 200 meters around 10:12.
+The view above calculates forward and backward rank, the time interval and distance (`DELTA_T` and `DELTA_S`) between consecutive observations, and generates a linestring which connects the points. For simplicity reasons, we are analyzing a single ship's (`MMSI = 366780000`) movement in a 24h interval. We see that the time interval between two AIS signals is about 70 seconds and the distance is greater than 200 meters at first, but then drops below 200 meters around 10:12.
 
 ![](images/step1.png)
 
@@ -122,7 +122,7 @@ We can see that the average speed is highest (4.7 and 4.8 m/sec) in the early PM
 ## Vessel Trajectories<a name="subex2"></a>
 
 In the last exercise, we generated a vessel's trajectory or route by simply aggregating individual 2-point linestrings into a geometry collection using `ST_CollectAggr()`. For pure visualization purposes this might be good enough - QGIS doesn't care if you want it to render a collection of 1000 lines with just a start and an end point, or to render a single linestring with 500 supporting points. However, it is much more appropriate to calculate trajectories as a single geometry based on supporting points with measures, or "M" values. For our vessel trajectories a natural choice for "M" is a timestamp-like measure - we simply take the seconds between the beginning of our dataset and the actual observation.
-A convenient way to construct a linestring from a set of points is to use the `STRING_AGG` function to generate a Well Known Text (WKT) string from which we can construct a geometry. The query below takes the result of the motion statistics table function for 5 vessels, and generates a linestring for each vessel.
+A convenient way to construct a linestring from a set of points is to use the `STRING_AGG` function to generate a Well-Known Text (WKT) string from which we can construct a geometry. The query below takes the result of the motion statistics table function for 5 vessels, and generates a linestring for each vessel.
 
 ```SQL
 SELECT "MMSI", ST_GeomFromText(
@@ -147,7 +147,7 @@ In a similar way we can generate the trajectories of cargo ships in a 7 day inte
 
 ## Dwell Locations and Trip Segments<a name="subex3"></a>
 
-The blue line of the passenger ship in the screenshot above tells us that this ship is going back and forth between the Milwaukee and Muskegon. In this section we want to subdivide the trajectory into individual trip segments, i.e. identify dwell locations. We will basically inspect a sliding window of *n* minutes to find intervals with no or minimal motion. Knowing these "no motion" intervals allows us to split the trajectory into segments.
+The blue line of the passenger ship in the screenshot above tells us that this ship is going back and forth between Milwaukee and Muskegon. In this section we want to subdivide the trajectory into individual trip segments, i.e. identify dwell locations. We will basically inspect a sliding window of *n* minutes to find intervals with no or minimal motion. Knowing these "no motion" intervals allows us to split the trajectory into segments.
 In the end, we will create a single table function detecting trip segments, but first we will create five stacked views to explain the logic.
 1. We create sliding windows, joining each observation to the ones within the previous n minutes
 2. We then check the sum of the distances between the observations in a window - if less than 100 m, we assign a 'no motion' flag
@@ -185,7 +185,7 @@ SELECT "MMSI", "TS", "TS2", "SHAPE_32616_2", "DIST_TO_PREV", "DIST"
 	ORDER BY "MMSI", "TS", "TS2";
 ```
 
-Query 1 above returns for each observation (see the highlighted one below at 16:53:03) the previous ones up 5 minutes (see column "TS2" - ranging from 16:48:48 to 16:53:03). `DIST_TO_PREV` contains the spatial distance to the previous observation (17 - 51 meters). We are only interested in the four distances *between* the observations WITHIN one window - this is why "DIST" is 0 for the oldest element in the window (line 356).
+Query 1 above returns for each observation (see the highlighted one below at 16:53:03) the previous ones up to 5 minutes (see column `TS2` - ranging from 16:48:48 to 16:53:03). `DIST_TO_PREV` contains the spatial distance to the previous observation (17 - 51 meters). We are only interested in the four distances *between* the observations WITHIN one window - this is why `DIST` is 0 for the oldest element in the window (line 356).
 
 ![](images/segments_step1.png)
 
@@ -312,7 +312,7 @@ END;
 SELECT * FROM "AIS_DEMO"."F_TRIP_SEGMENTS_DIST"(' "MMSI" = 367341010 ', 8, 80);
 ```
 
-The QGIS map below display the analysis for a single vessel's two months of motion. The different colors indicate different trip segments.
+The QGIS map below displays the analysis for a single vessel's two months of motion. The different colors indicate different trip segments.
 
 ![](images/segments_single_vessel.png)
 
