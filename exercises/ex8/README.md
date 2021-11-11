@@ -1,6 +1,6 @@
 # Exercise 8 - Enterprise Search
 
-In this exercise, we will quickly introduce "Enterprise Search" (ESH) which is an integral part of SAP HANA. We will first create a search model, run a couple of search queries, and finally see a search UI in action. For more details see the [SAP HANA Cloud Search Developer Guide](https://help.sap.com/viewer/05c9edaee7fe4d28ab3627d0b1583df6/latest/en-US) and the [Development Kit Typescript](https://github.wdf.sap.corp/EnterpriseSearch/development-kit-typescript).
+In this exercise, we will quickly introduce "Enterprise Search" (ESH) which is an integral part of SAP HANA. We will first create a search model, run a couple of search queries, and finally see a search UI in action. For more details see the [SAP HANA Cloud Search Developer Guide](https://help.sap.com/viewer/05c9edaee7fe4d28ab3627d0b1583df6/latest/en-US) and the [Enterprise Search Development Kit](https://github.wdf.sap.corp/pages/EnterpriseSearch/getting-started/).
 
 ## Create a Search Model<a name="subex1"></a>
 
@@ -47,11 +47,11 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_ESH_VESSELS" AS (
 SELECT * FROM "AIS_DEMO"."V_ESH_VESSELS";
 ````
 
-The data exposed by "V_ESH_VESSELS" looks like this.
+The data exposed by `V_ESH_VESSELS` looks like this.
 
 ![](images/search_data.png)
 
-Next, we define a search model on this data structure. A search model tells the search engine which columns to search in, and how results are displayed in the search UI. One way to define a search model is via the built-in procedure "ESH_CONFIG".
+Next, we define a search model on this data structure. A search model tells the search engine which columns to search in, and how results are displayed in the search UI. One way to define a search model is via the built-in procedure `ESH_CONFIG`.
 
 ````SQL
 CALL ESH_CONFIG('
@@ -123,7 +123,7 @@ CALL ESH_CONFIG('
 
 ## Run a Search Query<a name="subex2"></a>
 
-Search queries can be run via the built-in procedure "ESH_SEARCH" and use ODATA syntax.
+Search queries can be run via the built-in procedure `ESH_SEARCH` and use ODATA syntax.
 
 ````SQL
 CALL SYS.ESH_SEARCH('[ "/v20411/$all?$filter=Search.search(query=''ann'')" ]', ?);

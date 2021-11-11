@@ -1,7 +1,7 @@
 # Exercise 4 - Spatial Clustering
 
 In this exercise, we will use spatial clustering techniques to understand density and spatial distribution of AIS observations.
-There a some techniques to cluster points - (rectangular) grid, hexagon, DBScan, and KMeans. See the [SAP HANA Cloud Spatial Reference](https://help.sap.com/viewer/bc9e455fe75541b8a248b4c09b086cf5/2021_3_QRC/en-US/7eb3c0e6bbf04fc6bcb9809d81533e6f.html) for details. For all variants, there is a native SQL syntax: *GROUP CLUSTER BY*. For hexagon clustering with 400 cells in Y direction the statement looks like this:
+There a some techniques to cluster points - (rectangular) grid, hexagon, DBScan, and KMeans. See the [SAP HANA Cloud Spatial Reference](https://help.sap.com/viewer/bc9e455fe75541b8a248b4c09b086cf5/2021_3_QRC/en-US/7eb3c0e6bbf04fc6bcb9809d81533e6f.html) for details. For all variants, there is a native SQL syntax: `GROUP CLUSTER BY`. For hexagon clustering with 400 cells in Y direction the statement looks like this:
 
 ```SQL
 SELECT ST_CLUSTERID() AS "ID", ST_CLUSTERCELL() AS "SHAPE", COUNT(*) AS C, COUNT(DISTINCT "MMSI") AS "SHIPS"

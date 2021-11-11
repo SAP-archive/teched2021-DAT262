@@ -4,7 +4,7 @@ In this exercise, we will leverage the data created by spatio-temporal clusterin
 
 ## Create Space-Time Cube<a name="subex1"></a>
 
-First, we will store the data from spatio-temporal clustering into a table "ST_CUBE".
+First, we will store the data from spatio-temporal clustering into a table `ST_CUBE`.
 
 ````SQL
 CREATE COLUMN TABLE "AIS_DEMO"."ST_CUBE" AS (
@@ -23,7 +23,7 @@ The generated data for cluster cell 562 looks like below: during the interval [2
 ## Timeseries Forecasting using Massive Auto Exponential Smoothing<a name="subex2"></a>
 
 Now, based on the historic timeseries of vessel observations for each cluster cell, we run a timeseries forecast algorithm called "Auto Exponential Smoothing", which is exposed via the new "Unified Exponential Smoothing" (UES) interface of the Predictive Analysis Library (PAL). See [PAL UES documentation](https://help.sap.com/viewer/319d36de4fd64ac3afbf91b1fb3ce8de/2021_3_QRC/en-US/0d3683ebfa3a445ea9df601f712b8fd7.html).
-We use a view to expose our ST_CUBE data to PAL and create a table for the results of the algorithm.
+We use a view to expose our `ST_CUBE` data to PAL and create a table for the results of the algorithm.
 
 ````SQL
 CREATE OR REPLACE VIEW "AIS_DEMO"."UES_DATA" AS (
@@ -35,7 +35,7 @@ CREATE COLUMN TABLE "AIS_DEMO"."UES_FORECAST" (
 );
 ````
 
-Next, we execute the actual algorithm. The following code block generates the parameters required by Unified Exponential Smoothing, calls the algorithms, and stores the result in the "UES_FORECATS" table.
+Next, we execute the actual algorithm. The following code block generates the parameters required by Unified Exponential Smoothing, calls the algorithms, and stores the result in the `UES_FORECAST` table.
 
 ````SQL
 DO BEGIN
@@ -61,9 +61,9 @@ DO BEGIN
 END;
 ````
 
-The "FUNCTION" parameter of UES is set to "MAESM", which is Massive Auto Exponential Smoothing. It automatically chooses the best exponential smoothing variant (single, double, triple) for each timeseries. Setting "FORECAST_NUM" to 12 indicates that we require 12 intervals to be forecasted.
+The "FUNCTION" parameter of UES is set to 'MAESM', which is Massive Auto Exponential Smoothing. It automatically chooses the best exponential smoothing variant (single, double, triple) for each timeseries. Setting "FORECAST_NUM" to 12 indicates that we require 12 intervals to be forecasted.
 
-To view the historic data along the forecast, we join the historic data to the "UES_FORECAST" table.
+To view the historic data along the forecast, we join the historic data to the `UES_FORECAST` table.
 
 ````SQL
 -- Joining the historic data and forecast to view them side-by-side

@@ -25,7 +25,9 @@ The JSON data in a GDELT GEG file looks like below. For a news article there is 
 }
 ````
 
-We will now import a file covering a 15 minute interval of global news coverage. There are many ways to import or replicate data in SAP HANA Cloud. A nice one is part of the [Python Client API for machine learning algorithms](https://help.sap.com/doc/1d0ebfe5e8dd44d09606814d83308d4b/2.0.05/en-US/html/index.html). Primarily facilitating the use of PAL algorithms for data scientists, its docstore package contains a function *create_collection_from_elements* which writes JSON data into a collection in HANA Document Store. The python code below uses this function.
+We will now import a file covering a 15 minute interval of global news coverage. There are many ways to import or replicate data in SAP HANA Cloud. A nice one is part of the [Python Client API for machine learning algorithms (hana-ml)](https://help.sap.com/doc/1d0ebfe5e8dd44d09606814d83308d4b/2.0.05/en-US/html/index.html). Primarily facilitating the use of PAL algorithms for data scientists, its `docstore` package contains a function `create_collection_from_elements` which writes JSON data into a collection in HANA Document Store. The python code below uses this function.
+
+*If you want to work with the GEG data, but don't want to get into hana-ml, you can also import the file "DAT262_AIS_DEMO_GEG.tar.gz" in the [data_and_script](../data_and_script/) folder via Database Explorer. Note this only works if you have a HANA system with Document Store enabled. Document Store is currently not available in SAP HANA Cloud trial.*
 
 ````Python
 import gzip
@@ -120,7 +122,7 @@ SELECT * FROM "AIS_DEMO"."V_GEG_EDGES" WHERE "SALIENCE" > 0.003
 	INTO "AIS_DEMO"."GDELT_GEG_EDGES"("SOURCE", "SOURCE_NAME", "SOURCE_TYPE", "TARGET", "TARGET_NAME", "TARGET_TYPE", "SALIENCE", "COU");
 ````
 
-And finally, we will create a data structure exposing the vertices of our network. We need to deal with different and language dependent "NAME" strings for entities with the same "ID". That's the reason for the MAX("NAME") and MAX("TYPE") - I simply take one of the name/type combinations.
+And finally, we will create a data structure exposing the vertices of our network. We need to deal with different and language dependent `NAME` strings for entities with the same `ID`. That's the reason for the `MAX("NAME")` and `MAX("TYPE")` - I simply take one of the name/type combinations.
 
 ````SQL
 -- The networks' vertices are simply projected from the V_GEG_EDGES view
@@ -133,7 +135,7 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_GDELT_GEG_VERTICES" AS (
 );
 ````
 
-So, now we got the edges derived from the entity co-occurrence and the vertices of our network. Next, we will create a GRAPH WORKSPACE which exposes the data to the Graph Engine.
+So, now we got the edges derived from the entity co-occurrence and the vertices of our network. Next, we will create a `GRAPH WORKSPACE` which exposes the data to the Graph Engine.
 
 ````SQL
 CREATE GRAPH WORKSPACE "AIS_DEMO"."GRAPH_GEG"

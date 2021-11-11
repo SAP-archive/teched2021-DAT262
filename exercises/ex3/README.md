@@ -27,10 +27,10 @@ SELECT * FROM "AIS_DEMO"."V_MOTION_STATS_1" ORDER BY "TS" ASC;
 ```
 
 The view above calculates forward and backward rank, the time interval and distance ("DELTA_T" and "DELTA_S") between consecutive observations, and generates a linestring which connects the points. For simplicity reasons, we are analyzing a single ship's ("MMSI" = 366780000) movement in a 24h interval. We see that the time interval between two AIS signals is about 70 seconds and the distance is greater than 200 meters at first, but then drops below 200 meters around 10:12.
-<br>![](images/step1.png)
 
+![](images/step1.png)
 
-The next piece of logic calculates the speed in m/s, dividing "DELTA_S" by "DELTA_T", and sums up "DELTA_S" and "DELTA_T" so we understand how long and how far a ship has travelled up to that point.
+The next piece of logic calculates the speed in m/s, dividing `DELTA_S` by `DELTA_T`, and sums up `DELTA_S` and `DELTA_T` so we understand how long and how far a ship has travelled up to that point.
 
 ```SQL
 -- Step 2: sum up delta s and delta t, calculate speed
@@ -42,7 +42,7 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_MOTION_STATS_2" AS (
 );
 SELECT * FROM "AIS_DEMO"."V_MOTION_STATS_2" ORDER BY "TS" ASC;
 ```
-The second view above adds "TOTAL_DISTANCE", "TOTAL_TIMESPAN", and "SPEED_M/S". Looking at line 11 we see that the ship has travelled 2714 meter in 690 seconds, running with a current speed of 3.345 m/sec.
+The second view above adds `TOTAL_DISTANCE`, `TOTAL_TIMESPAN`, and `SPEED_M/S`. Looking at line 11 we see that the ship has travelled 2714 meter in 690 seconds, running with a current speed of 3.345 m/sec.
 
 ![](images/step2.png)
 
@@ -60,7 +60,7 @@ So, looking at the first column in the table below we see the ship is decelerati
 
 ![](images/step3.png)
 
-Next, we will wrap the logic of the three SQL views above into a single user-defined function. This will allow very flexible filtering - we can simply pass a valid WHERE condition in the parameter "i_filter". This filter is applied on our AIS_2017 table using the APPLY_FILTER() function (... strange name for this function, do you agree?). The filtered data "DAT" is the data on which we run our motion statistics logic. The resulting dataset "MS" is then returned by the function.
+Next, we will wrap the logic of the three SQL views above into a single user-defined function. This will allow very flexible filtering - we can simply pass a valid WHERE condition in the parameter "i_filter". This filter is applied on our `AIS_2017` table using the `APPLY_FILTER()` function (... strange name for this function, do you agree?). The filtered data `DAT` is the data on which we run our motion statistics logic. The resulting dataset `MS` is then returned by the function.
 
 ```SQL
 -- Now, let's wrap the 3-step logic of the SQL views above into a single function
@@ -104,11 +104,11 @@ Here is a how the motion statistics could be visualized in QGIS. The first scree
 ![](images/speed.png)
 <br><br>![](images/trace.png)
 
-As an alternative, we can plot "SPEED_M/S" and "TOTAL_DISTANCE" over time directly in SAP HANA Database Explorer. We see two longer and a shorter period with high speed (peaks in the blue line). Accordingly, the orange line indicates total distance.
+As an alternative, we can plot `SPEED_M/S` and `TOTAL_DISTANCE` over time directly in SAP HANA Database Explorer. We see two longer and a shorter period with high speed (peaks in the blue line). Accordingly, the orange line indicates total distance.
 
 ![](images/speed_distance.png)
 
-We can use the user-defined function "F_MOTION_STATS" as sub-query or derive additional statistics from the result. The below query for example takes the fine granular motion statistics and calculates hourly average and maximum of speed for a 7 day interval.
+We can use the user-defined function `F_MOTION_STATS` as sub-query or derive additional statistics from the result. The below query for example takes the fine granular motion statistics and calculates hourly average and maximum of speed for a 7 day interval.
 ```SQL
 SELECT HOUR("TS"), COUNT(*), COUNT(DISTINCT "MMSI"), AVG("SPEED_M/S"), MAX("SPEED_M/S")
 	FROM "AIS_DEMO"."F_MOTION_STATS"(' "TS" BETWEEN ''2017-06-01 00:00:00'' AND ''2017-06-07 24:00:00'' ') WHERE "SPEED_M/S" > 0.5
@@ -121,8 +121,8 @@ We can see that the average speed is highest (4.7 and 4.8 m/sec) in the early PM
 
 ## Vessel Trajectories<a name="subex2"></a>
 
-In the last exercise, we generated a vessel's trajectory or route by simply aggregating individual 2-point linestrings into a geometry collection using *ST_CollectAggr()*. For pure visualization purposes this might be good enough - QGIS doesn't care if you want it to render a collection of 1000 lines with just a start and an end point, or to render a single linestring with 500 supporting points. However, it is much more appropriate to calculate trajectories as a single geometry based on supporting points with measures, or "M" values. For our vessel trajectories a natural choice for "M" is a timestamp-like measure - we simply take the seconds between the beginning of our dataset and the actual observation.
-A convenient way to construct a linestring from a set of points is to use the *STRING_AGG* function to generate a Well Known Text (WKT) string from which we can construct a geometry. The query below takes the result of the motion statistics table function for 5 vessels, and generates a linestring for each vessel.
+In the last exercise, we generated a vessel's trajectory or route by simply aggregating individual 2-point linestrings into a geometry collection using `ST_CollectAggr()`. For pure visualization purposes this might be good enough - QGIS doesn't care if you want it to render a collection of 1000 lines with just a start and an end point, or to render a single linestring with 500 supporting points. However, it is much more appropriate to calculate trajectories as a single geometry based on supporting points with measures, or "M" values. For our vessel trajectories a natural choice for "M" is a timestamp-like measure - we simply take the seconds between the beginning of our dataset and the actual observation.
+A convenient way to construct a linestring from a set of points is to use the `STRING_AGG` function to generate a Well Known Text (WKT) string from which we can construct a geometry. The query below takes the result of the motion statistics table function for 5 vessels, and generates a linestring for each vessel.
 
 ```SQL
 SELECT "MMSI", ST_GeomFromText(
@@ -185,7 +185,7 @@ SELECT "MMSI", "TS", "TS2", "SHAPE_32616_2", "DIST_TO_PREV", "DIST"
 	ORDER BY "MMSI", "TS", "TS2";
 ```
 
-Query 1 returns for each observation (see the highlighted one at 16:53:03) the previous ones up 5 minutes (see column "TS2" - ranging from 16:48:48 to 16:53:03). "DIST_TO_PREV" contains the spatial distance to the previous observation (17 - 51 meters). We are only interested in the four distances *between* the observations WITHIN one window - this is why "DIST" is 0 for the oldest element in the window (line 356).
+Query 1 above returns for each observation (see the highlighted one below at 16:53:03) the previous ones up 5 minutes (see column "TS2" - ranging from 16:48:48 to 16:53:03). `DIST_TO_PREV` contains the spatial distance to the previous observation (17 - 51 meters). We are only interested in the four distances *between* the observations WITHIN one window - this is why "DIST" is 0 for the oldest element in the window (line 356).
 
 ![](images/segments_step1.png)
 
@@ -208,7 +208,7 @@ SELECT "MMSI", "TS", "SHAPE_32616", "NUM_OBS_IN_INTERVAL", "SUM_DIST", "MOTION"
 	ORDER BY "MMSI", "TS" ASC;
 ```
 
-Query 2 aggregates the windows. For our observation at 16:53:03 we see that there are 5 observations in the last 5 minutes, resulting in a cumulative distance of 98.7m. Since this is below the threshold (100m), the flag is set to "no motion".
+Query 2 above aggregates the windows. For our observation at 16:53:03 we see that there are 5 observations in the last 5 minutes, resulting in a cumulative distance of 98.7m. Since this is below the threshold (100m), the flag is set to "no motion".
 
 ![](images/segments_step2.png)
 
@@ -228,7 +228,7 @@ SELECT "MMSI", "TS", "MOTION", "MOTION_CHANGE", "SHAPE_32616"
 	ORDER BY "MMSI", "TS" ASC;
 ```
 
-As the "MOTION" flag changes from 'motion' to 'no motion' at 16:53:03 we set a "MOTION_CHANGE" flag 'stopped'.
+As the `MOTION` flag changes from 'motion' to 'no motion' at 16:53:03 we set a `MOTION_CHANGE` flag 'stopped'.
 
 ![](images/segments_step3.png)
 
@@ -244,7 +244,7 @@ SELECT "MMSI", "TS", "MOTION", "MOTION_CHANGE", "TRIP_SEGMENT", "SHAPE_32616"
 	FROM "AIS_DEMO"."V_DWELL_LOC_4_DIST"
 	ORDER BY "MMSI", "TS" ASC;
 ```
-In step 4 we just count the "MOTION_CHANGE" markers to generate a "TRIP_SEGMENT" number. At 16:53:03 trip segment 1 begins.
+In step 4 we just count the `MOTION_CHANGE` markers to generate a `TRIP_SEGMENT` number. At 16:53:03 trip segment 1 begins.
 
 ![](images/segments_step4.png)
 
@@ -267,7 +267,7 @@ In the last step we simply sum up some values by trip segment. Line 2 contains t
 
 ### Steps 1-5 in a single table function
 
-We can wrap the 5 simple steps from above in a single table function, so we can call it in the same flexible manner as our motion statistics above.
+We can wrap the 5 individual steps from above into a single table function, so we can call it in the same flexible manner as our motion statistics in the first section.
 
 ```SQL
 -- Wrap steps 1-5 in a function, so we can call it with a filter clause
