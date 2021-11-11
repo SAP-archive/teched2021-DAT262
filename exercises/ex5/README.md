@@ -19,11 +19,13 @@ CREATE COLUMN TABLE "AIS_DEMO"."ROUTE_NETWORK_VERTICES" (
 	"CARGO_FACTOR" DOUBLE DEFAULT 1.0
 );
 
-SELECT ST_CLUSTERID() AS "ID", ST_CLUSTERCELL() AS "HEXAGON", ST_CLUSTERCELL().ST_CENTROID() AS "CENTROID",
+INSERT INTO "AIS_DEMO"."ROUTE_NETWORK_VERTICES" ("ID", "HEXAGON", "CENTROID", "C", "SHIPS", "SOG")
+(
+	SELECT ST_CLUSTERID() AS "ID", ST_CLUSTERCELL() AS "HEXAGON", ST_CLUSTERCELL().ST_CENTROID() AS "CENTROID",
 		COUNT(*) AS C, COUNT(DISTINCT "MMSI") AS "SHIPS", AVG("SOG") AS "SOG"
 	FROM "AIS_DEMO"."AIS_2017"
 	GROUP CLUSTER BY "SHAPE_32616" USING HEXAGON Y CELLS 400
-	INTO "AIS_DEMO"."ROUTE_NETWORK_VERTICES" ("ID", "HEXAGON", "CENTROID", "C", "SHIPS", "SOG");
+);
 ```
 
 We want to find routes for cargo ships especially. So, if the cluster cell is on a frequent cargo route, we set a `CARGO_FACTOR`. For this, we are re-using the results from the cargo ship clustering we ran in the previous exercise. The higher the number of cargo ships observed in a cluster cell, the lower the cargo fact will be: 1/number of ships. The `CARGO_FACTOR` will then be used in a cost function to calculate a least-cost path... i.e. a path that *favors* established cargo routes.
