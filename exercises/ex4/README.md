@@ -9,9 +9,42 @@ SELECT ST_CLUSTERID() AS "ID", ST_CLUSTERCELL() AS "SHAPE", COUNT(*) AS C, COUNT
 	GROUP CLUSTER BY "SHAPE_32616" USING HEXAGON Y CELLS 400;
 ```
 
-We can use spatial clusters to understand the density of cargo vessel observations. The QGIS map below plots a high number of observation in red, low numbers in blue. We see that cargo ships are mainly travelling the north-south route.
+We can use spatial clusters to understand the density of cargo vessel observations. Let's store this data in a table.
+
+````SQL
+-- Create a table to store the result for CARGO vessels
+CREATE COLUMN TABLE "AIS_DEMO"."CLUSTER_CARGO" (
+	"ID" INT PRIMARY KEY,
+	"SHAPE_32616" ST_GEOMETRY(32616),
+	"C" INT,
+	"SHIPS" INT,
+	"SOG" DOUBLE
+);
+SELECT ST_CLUSTERID() AS "ID", ST_CLUSTERCELL() AS "SHAPE", COUNT(*) AS C, COUNT(DISTINCT "MMSI") AS "SHIPS", AVG("SOG") AS "SOG"
+	FROM "AIS_DEMO"."AIS_2017" WHERE VESSELTYPE = 1004
+	GROUP CLUSTER BY "SHAPE_32616" USING HEXAGON Y CELLS 400
+	INTO "AIS_DEMO"."CLUSTER_CARGO";
+````
+The QGIS map below plots a high number of observation in red, low numbers in blue. We see that cargo ships are mainly travelling the north-south route.
 
 ![](images/clustering_cargo.png)
+
+... same for passenger vessels.
+
+````SQL
+-- Create a table to store the result for PASSENGER vessels
+CREATE COLUMN TABLE "AIS_DEMO"."CLUSTER_PASSENGER" (
+	"ID" INT PRIMARY KEY,
+	"SHAPE_32616" ST_GEOMETRY(32616),
+	"C" BIGINT,
+	"SHIPS" INT,
+	"SOG" DOUBLE
+);
+SELECT ST_CLUSTERID() AS "ID", ST_CLUSTERCELL() AS "SHAPE", COUNT(*) AS C, COUNT(DISTINCT "MMSI") AS "SHIPS", AVG("SOG") AS "SOG"
+	FROM "AIS_DEMO"."AIS_2017" WHERE VESSELTYPE = 1012
+	GROUP CLUSTER BY "SHAPE_32616" USING HEXAGON Y CELLS 400
+	INTO "AIS_DEMO"."CLUSTER_PASSENGER";
+````
 
 For passenger ships, the distribution looks different - here we see mainly east-west traffic.
 
