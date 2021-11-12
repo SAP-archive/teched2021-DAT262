@@ -13,7 +13,7 @@ SELECT COUNT(*) FROM "AIS_DEMO"."AIS_2017"; --3.7 mio
 SELECT COUNT(*) FROM "AIS_DEMO"."AIS_2017_06"; --4.6 mio
 
 -- We copy the data from the second table into the first, so it is all in one place.
-SELECT * FROM "AIS_DEMO"."AIS_2017_06" INTO "AIS_DEMO"."AIS_2017";
+INSERT INTO "AIS_DEMO"."AIS_2017" SELECT * FROM "AIS_DEMO"."AIS_2017_06"; 
 SELECT COUNT(*) FROM "AIS_DEMO"."AIS_2017"; --8.4 mio
 -- After the copy, we can drop the second table
 DROP TABLE "AIS_DEMO"."AIS_2017_06";
