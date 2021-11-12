@@ -28,7 +28,7 @@ INSERT INTO "AIS_DEMO"."ROUTE_NETWORK_VERTICES" ("ID", "HEXAGON", "CENTROID", "C
 );
 ```
 
-We want to find routes for cargo ships especially. So, if the cluster cell is on a frequent cargo route, we set a `CARGO_TRANSIT_COST_FACTOR`. For this, we are re-using the results from the cargo ship clustering we ran in the previous exercise. The higher the number of cargo ships observed in a cluster cell, the lower the cargo fact will be: 1/number of ships. The `CARGO_TRANSIT_COST_FACTOR` will then be used in a cost function to calculate a least-cost path... i.e. a path that *favors* established cargo routes.
+We want to find routes for cargo ships especially. So, if the cluster cell is on a frequent cargo route, we set a property `CARGO_TRANSIT_COST_FACTOR`. For this, we are re-using the results from the cargo ship clustering we ran in the previous exercise. The higher the number of cargo ships observed in a cluster cell, the lower the `CARGO_TRANSIT_COST_FACTOR` will be: 1/number of ships. The `CARGO_TRANSIT_COST_FACTOR` will then be used in a cost function to calculate a least-cost path... i.e. a path that *favors* established cargo routes.
 
 So, let's update the network vertices `CARGO_TRANSIT_COST_FACTOR` column.
 
@@ -43,7 +43,7 @@ MERGE INTO "AIS_DEMO"."ROUTE_NETWORK_VERTICES" R
 
 SELECT * FROM "AIS_DEMO"."ROUTE_NETWORK_VERTICES";
 
-SELECT MIN(CARGO_FACTOR), MAX(CARGO_FACTOR)
+SELECT MIN("CARGO_TRANSIT_COST_FACTOR"), MAX("CARGO_TRANSIT_COST_FACTOR")
   FROM "AIS_DEMO"."ROUTE_NETWORK_VERTICES";
 ```
 The network vertices table now contains the following data: each vertex is represented by a hexagon and centroid, along with the number of observations, and the number of distinct ships. The highlighted cell below is an area where cargo ships usually travel... the `CARGO_TRANSIT_COST_FACTOR` is 0.111. When calculating routes, this cell will "cost" only 0.111 to traverse, whereas other cells are more costly, thus unlikely to be part of a cargo route.
