@@ -84,7 +84,8 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_GEG_ENTITIES" AS (
 			UNNEST "entities" AS E
 			WHERE E."type" IN ('PERSON', 'ORGANIZATION', 'LOCATION', 'EVENT')
 	);
-	SELECT * FROM "AIS_DEMO"."V_GEG_ENTITIES";
+
+SELECT * FROM "AIS_DEMO"."V_GEG_ENTITIES";
 ````
 
 ![](images/entities.png)
@@ -104,6 +105,7 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_GEG_EDGES" AS (
 	)
 	GROUP BY "ID1", "N1", "T1", "ID2", "N2", "T2"
 );
+
 SELECT * FROM "AIS_DEMO"."V_GEG_EDGES" WHERE SALIENCE > 0.004 ORDER BY COU DESC;
 ````
 
@@ -126,8 +128,8 @@ CREATE COLUMN TABLE "AIS_DEMO"."GDELT_GEG_EDGES" (
 	"COU" BIGINT
 );
 
-SELECT * FROM "AIS_DEMO"."V_GEG_EDGES" WHERE "SALIENCE" > 0.003
-	INTO "AIS_DEMO"."GDELT_GEG_EDGES"("SOURCE", "SOURCE_NAME", "SOURCE_TYPE", "TARGET", "TARGET_NAME", "TARGET_TYPE", "SALIENCE", "COU");
+INSERT INTO "AIS_DEMO"."GDELT_GEG_EDGES"("SOURCE", "SOURCE_NAME", "SOURCE_TYPE", "TARGET", "TARGET_NAME", "TARGET_TYPE", "SALIENCE", "COU")
+	SELECT * FROM "AIS_DEMO"."V_GEG_EDGES" WHERE "SALIENCE" > 0.003;
 ````
 
 And finally, we will create a data structure exposing the vertices of our network. We need to deal with different and language dependent `NAME` strings for entities with the same `ID`. That's the reason for the `MAX("NAME")` and `MAX("TYPE")` - I simply take one of the name/type combinations.
