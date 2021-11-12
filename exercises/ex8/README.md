@@ -15,7 +15,6 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_VESSEL_LAST_POSITION" AS (
 );
 
 -- ... and store the results in a table
-DROP TABLE "AIS_DEMO"."VESSELS";
 CREATE COLUMN TABLE "AIS_DEMO"."VESSELS" (
 	"MMSI" INT,
 	"VESSELNAME" NVARCHAR(100),
@@ -126,7 +125,7 @@ CALL ESH_CONFIG('
 Search queries can be run via the built-in procedure `ESH_SEARCH` and use ODATA syntax.
 
 ````SQL
-CALL SYS.ESH_SEARCH('[ "/v20411/$all?$filter=Search.search(query=''ann'')" ]', ?);
+CALL SYS.ESH_SEARCH('[ "/v20411/AIS_DEMO/$all?$filter=Search.search(query=''ann'')" ]', ?);
 ````
 
 Leveraging the development kit, we can bring up a search UI and interact with the data in a convenient way. We first search for "ann" in our vessel data.

@@ -76,6 +76,15 @@ SELECT "url", "lang", E."mid", E."name", E."type", E."avgSalience"
 	FROM "AIS_DEMO"."GDELT_GEG"
 	UNNEST "entities" AS E
 	WHERE E."type" IN ('PERSON', 'ORGANIZATION', 'LOCATION', 'EVENT');
+
+-- Let's create a view that provides access to the POLE entities in the documents
+CREATE OR REPLACE VIEW "AIS_DEMO"."V_GEG_ENTITIES" AS (
+	SELECT TO_NVARCHAR("url") AS "url", TO_NVARCHAR("lang") AS "lang", TO_NVARCHAR(E."mid") AS "mid", TO_NVARCHAR(E."name") AS "name", TO_NVARCHAR(E."type") AS "type", TO_DOUBLE(E."avgSalience") AS "avgSalience"
+			FROM "AIS_DEMO"."GDELT_GEG"
+			UNNEST "entities" AS E
+			WHERE E."type" IN ('PERSON', 'ORGANIZATION', 'LOCATION', 'EVENT')
+	);
+	SELECT * FROM "AIS_DEMO"."V_GEG_ENTITIES";
 ````
 
 ![](images/entities.png)
@@ -105,7 +114,6 @@ We see for example that "U.S." and "Mexico" co-occur in 6 news articles.
 Next, we will store the more prominent relations in a table.
 
 ````SQL
-DROP TABLE "AIS_DEMO"."GDELT_GEG_EDGES";
 CREATE COLUMN TABLE "AIS_DEMO"."GDELT_GEG_EDGES" (
 	"ID" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	"SOURCE" nvarchar(1000) NOT NULL,
