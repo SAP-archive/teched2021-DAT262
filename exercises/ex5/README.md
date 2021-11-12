@@ -16,7 +16,7 @@ CREATE COLUMN TABLE "AIS_DEMO"."ROUTE_NETWORK_VERTICES" (
 	"C" BIGINT,
 	"SHIPS" INT,
 	"SOG" DOUBLE,
-	"CARGO_FACTOR" DOUBLE DEFAULT 1.0
+	"CARGO_TRANSIT_COST_FACTOR" DOUBLE DEFAULT 1.0
 );
 
 INSERT INTO "AIS_DEMO"."ROUTE_NETWORK_VERTICES" ("ID", "HEXAGON", "CENTROID", "C", "SHIPS", "SOG")
@@ -28,25 +28,25 @@ INSERT INTO "AIS_DEMO"."ROUTE_NETWORK_VERTICES" ("ID", "HEXAGON", "CENTROID", "C
 );
 ```
 
-We want to find routes for cargo ships especially. So, if the cluster cell is on a frequent cargo route, we set a `CARGO_FACTOR`. For this, we are re-using the results from the cargo ship clustering we ran in the previous exercise. The higher the number of cargo ships observed in a cluster cell, the lower the cargo fact will be: 1/number of ships. The `CARGO_FACTOR` will then be used in a cost function to calculate a least-cost path... i.e. a path that *favors* established cargo routes.
+We want to find routes for cargo ships especially. So, if the cluster cell is on a frequent cargo route, we set a `CARGO_TRANSIT_COST_FACTOR`. For this, we are re-using the results from the cargo ship clustering we ran in the previous exercise. The higher the number of cargo ships observed in a cluster cell, the lower the cargo fact will be: 1/number of ships. The `CARGO_TRANSIT_COST_FACTOR` will then be used in a cost function to calculate a least-cost path... i.e. a path that *favors* established cargo routes.
 
-So, let's update the network vertices `CARGO_FACTOR` column.
+So, let's update the network vertices `CARGO_TRANSIT_COST_FACTOR` column.
 
 ```SQL
 MERGE INTO "AIS_DEMO"."ROUTE_NETWORK_VERTICES" R
-	USING (SELECT R."ID", 1/MAX(C."SHIPS") AS "CARGO_FACTOR" FROM "AIS_DEMO"."ROUTE_NETWORK_VERTICES" AS R
+	USING (SELECT R."ID", 1/MAX(C."SHIPS") AS "CARGO_TRANSIT_COST_FACTOR" FROM "AIS_DEMO"."ROUTE_NETWORK_VERTICES" AS R
 		INNER JOIN "AIS_DEMO"."CLUSTER_CARGO" AS C
 		ON R."CENTROID".ST_INTERSECTS(C."SHAPE_32616") = 1
 		GROUP BY R."ID") AS C
 	ON R."ID" = C."ID"
-	WHEN MATCHED THEN UPDATE SET R."CARGO_FACTOR" = C."CARGO_FACTOR";
+	WHEN MATCHED THEN UPDATE SET R."CARGO_TRANSIT_COST_FACTOR" = C."CARGO_TRANSIT_COST_FACTOR";
 
 SELECT * FROM "AIS_DEMO"."ROUTE_NETWORK_VERTICES";
 
 SELECT MIN(CARGO_FACTOR), MAX(CARGO_FACTOR)
   FROM "AIS_DEMO"."ROUTE_NETWORK_VERTICES";
 ```
-The network vertices table now contains the following data: each vertex is represented by a hexagon and centroid, along with the number of observations, and the number of distinct ships. The highlighted cell below is an area where cargo ships usually travel... the `CARGO_FACTOR` is 0.111. When calculating routes, this cell will "cost" only 0.111 to traverse, whereas other cells are more costly, thus unlikely to be part of a cargo route.
+The network vertices table now contains the following data: each vertex is represented by a hexagon and centroid, along with the number of observations, and the number of distinct ships. The highlighted cell below is an area where cargo ships usually travel... the `CARGO_TRANSIT_COST_FACTOR` is 0.111. When calculating routes, this cell will "cost" only 0.111 to traverse, whereas other cells are more costly, thus unlikely to be part of a cargo route.
 
 ![](images/vertices.png)
 
@@ -95,7 +95,7 @@ WITH C AS (
 ;
 ```
 
-With this view, we can generate the edges connecting two adjacent hexagons and store them in the table `ROUTE_NETWORK_EDGES`. The edges have attributes which we will use for path finding later, e.g. the `AVG_CARGO_FACTOR`, which is the average of the cargo factors assigned to the source and target vertex.
+With this view, we can generate the edges connecting two adjacent hexagons and store them in the table `ROUTE_NETWORK_EDGES`. The edges have attributes which we will use for path finding later, e.g. the `AVG_CARGO_TRANSIT_COST_FACTOR`, which is the average of the `CARGO_TRANSIT_COST_FACTOR` assigned to the source and target vertex.
 
 ````SQL
 -- Create the edges table
@@ -108,22 +108,22 @@ CREATE COLUMN TABLE "AIS_DEMO"."ROUTE_NETWORK_EDGES" (
 	"AVG_C" DOUBLE,
 	"AVG_SHIPS" DOUBLE,
 	"AVG_SOG" DOUBLE,
-	"AVG_CARGO_FACTOR" DOUBLE DEFAULT 1.0,
+	"AVG_CARGO_TRANSIT_COST_FACTOR" DOUBLE DEFAULT 1.0,
 	"BLOCKED" BOOLEAN DEFAULT FALSE
 );
 -- and fill edges table
-INSERT INTO "AIS_DEMO"."ROUTE_NETWORK_EDGES"("SOURCE", "TARGET", "LINE_32616", "LENGTH", "AVG_C", "AVG_SHIPS", "AVG_SOG", "AVG_CARGO_FACTOR")
+INSERT INTO "AIS_DEMO"."ROUTE_NETWORK_EDGES"("SOURCE", "TARGET", "LINE_32616", "LENGTH", "AVG_C", "AVG_SHIPS", "AVG_SOG", "AVG_CARGO_TRANSIT_COST_FACTOR")
 	SELECT "SOURCE", "TARGET", ST_MAKELINE(C1."CENTROID", C2."CENTROID") AS "LINE_32616",
 		ST_MAKELINE(C1."CENTROID", C2."CENTROID").ST_LENGTH() AS "LENGTH",
 		(C1."C" + C2."C")/2 AS "AVG_C",
 		(C1."SHIPS" + C2."SHIPS")/2 AS "AVG_SHIPS",
 		(C1."SOG" + C2."SOG")/2 AS "AVG_SOG",
-		(C1."CARGO_FACTOR" + C2."CARGO_FACTOR")/2 AS "AVG_CARGO_FACTOR"
+		(C1."CARGO_TRANSIT_COST_FACTOR" + C2."CARGO_TRANSIT_COST_FACTOR")/2 AS "AVG_CARGO_FACTOR"
 	FROM "AIS_DEMO"."V_HEX_CLUSTER_NEIGHBORS"(400, 388) AS E -- take result from query above as size of the grid
 	INNER JOIN "AIS_DEMO"."ROUTE_NETWORK_VERTICES" AS C1 ON E."SOURCE" = C1."ID"
 	INNER JOIN "AIS_DEMO"."ROUTE_NETWORK_VERTICES" AS C2 ON E."TARGET" = C2."ID";
 
-SELECT MIN("AVG_CARGO_FACTOR"),MAX("AVG_CARGO_FACTOR") FROM "AIS_DEMO"."ROUTE_NETWORK_EDGES";
+SELECT MIN("AVG_CARGO_TRANSIT_COST_FACTOR"),MAX("AVG_CARGO_TRANSIT_COST_FACTOR") FROM "AIS_DEMO"."ROUTE_NETWORK_EDGES";
 ````
 
 Below we see the network's edges - red color indicates segments which are frequently travelled by cargo ships.
@@ -141,12 +141,14 @@ CREATE GRAPH WORKSPACE "AIS_DEMO"."ROUTE_NETWORK_GRAPH"
 
 ## Use Shortest Path with a Custom Cost Function<a name="subex2"></a>
 
-Having defined a graph workspace, we can leverage the *GraphScript* programming language to create database procedures and functions. The function below takes a START and END vertex, and calculates a least-cost path based on a custom cost function. The cost function takes the length and the `CARGO_FACTOR` into account. Essentially, it tries to balance between a shortest path (in terms of spatial distance) and a suitable path (in terms of where cargo ships usually go). Note that the path algorithm stops when edges are `BLOCKED`. Currently, no edges are blocked, but we will later update the graph and simulate a blockage.
+Having defined a graph workspace, we can leverage the *GraphScript* programming language to create database procedures and functions. The function below takes a START and END vertex, and calculates a least-cost path based on a custom cost function. The cost function takes the length and the `AVG_CARGO_TRANSIT_COST_FACTOR` into account. Essentially, it tries to balance between a shortest path (in terms of spatial distance) and a suitable path (in terms of where cargo ships usually go). Note that the path algorithm stops when edges are `BLOCKED`. Currently, no edges are blocked, but we will later update the graph and simulate a blockage.
 
 ````SQL
 -- SP function
 CREATE OR REPLACE FUNCTION "AIS_DEMO"."F_SHORTEST_PATH"(
-	IN i_startVertex BIGINT, IN i_endVertex BIGINT, IN i_cargoFactorWeight DOUBLE
+	IN i_startVertex BIGINT,
+	IN i_endVertex BIGINT,
+	IN i_cargoFactorWeight DOUBLE -- 0.0 calculates shortest path, 1.0 forces the path on cargo routes
 	)
 	RETURNS TABLE ("ID" BIGINT, "VERTEX_ORDER" BIGINT)
 LANGUAGE GRAPH AS
@@ -155,11 +157,12 @@ BEGIN
 	VERTEX v_start = Vertex(:g, :i_startVertex);
 	VERTEX v_end = Vertex(:g, :i_endVertex);
 	WeightedPath<DOUBLE> p = Shortest_Path(:g, :v_start, :v_end, (Edge e) => DOUBLE{
-		IF (:e."BLOCKED" == FALSE) {RETURN :e."LENGTH"*(:i_cargoFactorWeight + (1.0-:i_cargoFactorWeight)*:e."AVG_CARGO_FACTOR");}
+		IF (:e."BLOCKED" == FALSE) {RETURN :e."LENGTH"*((1.0 - :i_cargoFactorWeight) + :i_cargoFactorWeight*:e."AVG_CARGO_TRANSIT_COST_FACTOR");}
 		ELSE {END TRAVERSE;} }, 'ANY');
 	RETURN SELECT :v."ID", :VERTEX_ORDER FOREACH v IN Vertices(:p) WITH ORDINALITY AS VERTEX_ORDER;
 END;
-SELECT * FROM "AIS_DEMO"."F_SHORTEST_PATH"(29117, 28448, 0.8) AS P LEFT JOIN "AIS_DEMO"."ROUTE_NETWORK_VERTICES" AS V ON P.ID = V.ID;
+
+SELECT * FROM "AIS_DEMO"."F_SHORTEST_PATH"(29117, 28448, 0.4) AS P LEFT JOIN "AIS_DEMO"."ROUTE_NETWORK_VERTICES" AS V ON P.ID = V.ID;
 ````
 
 The calculated route from Menominee to Chicago is depicted below. Note that the route takes the canal at Sturgeon Bay (zoomed window).
