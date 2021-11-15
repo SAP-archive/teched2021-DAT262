@@ -2,7 +2,7 @@
 
 In this exercise, we will demonstrate a basic "point in polygon" pattern. At Lake Michigan there is the *Sleeping Bear Dunes National Lakeshore* park (depicted as the blue polygons below). We will run some queries to understand which vessels have crossed the park boundaries.
 
-The park boundaries are in the table `AIS_DEMO.PARK_BOUNDARIES` which we imported in exercise 1.
+The park boundaries need to be imported first. So, we import the file `DAT262_AIS_DEMO_BOUNDARIES_TEXT.tar.gz` just like we did with the files in exercise 1. After import, there is a table `AIS_DEMO.PARK_BOUNDARIES`.
 
 ````SQL
 -- We have a table which contains the boundaries of a national park

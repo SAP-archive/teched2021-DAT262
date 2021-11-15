@@ -4,18 +4,15 @@ In this exercise, we will import the data into a HANA table, do some data transf
 
 * DAT262_AIS_DEMO_AIS_2017_05_RAW_BINARY.tar.gz
 * DAT262_AIS_DEMO_AIS_2017_06_RAW_BINARY.tar.gz
-* DAT262_AIS_DEMO_BOUNDARIES_TEXT.tar.gz
 
 ## Import Data<a name="subex1"></a>
 
-We can load the data files into SAP HANA cloud using the Database Explorer. Just right click the `Catalog` node in the tree on the left and choose `Import Database Objects`. In the dialog, browse for "DAT262_AIS_DEMO_AIS_2017_05_RAW_BINARY.tar.gz", wait until the file has been inspected, then hit `IMPORT`.
+We can load the data files into SAP HANA cloud using the Database Explorer. Just right click the `Catalog` node in the tree on the left and choose `Import Database Objects`. In the dialog, browse for `DAT262_AIS_DEMO_AIS_2017_05_RAW_BINARY.tar.gz`, wait until the file has been inspected, then hit `IMPORT`.
 
 ![](images/imp1.png)
 ![](images/imp2.png)
 
-**Repeat** the import steps for the other two files:
-* "DAT262_AIS_DEMO_AIS_2017_06_RAW_BINARY.tar.gz"
-*  "DAT262_AIS_DEMO_BOUNDARIES_TEXT.tar.gz".
+**Repeat** the import steps for the second file `DAT262_AIS_DEMO_AIS_2017_06_RAW_BINARY.tar.gz`.
 
 We had to split the AIS dataset into two files because of file size restrictions on github. We will now merge the data into a single table, so we got all in one place.
 
