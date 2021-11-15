@@ -17,8 +17,6 @@ In exercise 5 and 6, we will show how to use an extension of spatial clustering 
 **Enterprise Search** is the topic of exercise 8. We will create a search model, run some search queries, and see the search UI.
 Finally, **Document Store** is leveraged in exercise 9 to ingest data from GDELT's Global Entity Graph and subsequently create a graph workspace which we can use for visualization.
 
-[image showing data in hana and the tools on top]
-
 ## Requirements
 
 Most of the spatial and graph related exercises can be run on an SAP HANA Cloud trial instance, but for the PAL and JSON Document Store related capabilities you currently would need to work with a "full" SAP HANA Cloud system.

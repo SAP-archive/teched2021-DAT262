@@ -37,6 +37,8 @@ The SAP HANA Database Explorer provides an SQL editor, table viewer and data ana
 
 **Enterprise Search** development kit<br>contains a search service and a search UI that can connect to SAP HANA. Refer to the [Enterprise Search Quick Start Guide](https://github.wdf.sap.corp/pages/EnterpriseSearch/getting-started/?rc=1).
 
+![](images/clients_apps.png)
+
 ##  Background Material<a name="subex4"></a>
 
 [SAP HANA Spatial Resources](https://blogs.sap.com/2020/11/02/sap-hana-spatial-resources-reloaded/)<br>
