@@ -3,7 +3,8 @@
 /***************************************/
 -- GDELT Global Entity Graph (GEG)
 -- https://blog.gdeltproject.org/announcing-the-global-entity-graph-geg-and-a-new-11-billion-entity-dataset/
--- JSON data is imported via hana-ml, or by uploading the data file DAT262_AIS_DEMO_GEG.tar.gz
+-- JSON data is imported via hana-ml, 
+-- or by uploading the data file DAT262_AIS_DEMO_GEG.tar.gz
 
 -- Inspect the data that is store in a JSON Document Store collection.
 -- A collection looks like a single-column table and stores JSON documents.
@@ -18,7 +19,7 @@ SELECT "url", "lang", E."mid", E."name", E."type", E."avgSalience"
 
 -- Let's create a view that provides access tp the entities in hte documents
 CREATE OR REPLACE VIEW "AIS_DEMO"."V_GEG_ENTITIES" AS (
-SELECT TO_NVARCHAR("url") AS "url", TO_NVARCHAR("lang") AS "lang", TO_NVARCHAR(E."mid") AS "mid", TO_NVARCHAR(E."name") AS "name", TO_NVARCHAR(E."type") AS "type", TO_DOUBLE(E."avgSalience") AS "avgSalience"
+	SELECT TO_NVARCHAR("url") AS "url", TO_NVARCHAR("lang") AS "lang", TO_NVARCHAR(E."mid") AS "mid", TO_NVARCHAR(E."name") AS "name", TO_NVARCHAR(E."type") AS "type", TO_DOUBLE(E."avgSalience") AS "avgSalience"
 		FROM "AIS_DEMO"."GDELT_GEG"
 		UNNEST "entities" AS E
 		WHERE E."type" IN ('PERSON', 'ORGANIZATION', 'LOCATION', 'EVENT')

@@ -5,7 +5,7 @@
 -- Import files
 --	DAT262_AIS_DEMO_AIS_2017_05_RAW_BINARY.tar.gz
 --	DAT262_AIS_DEMO_AIS_2017_06_RAW_BINARY.tar.gz
---	DAT262_AIS_DEMO_BOUNDARIES_TEXT.tar.gz
+
 
 -- ## Merge Tables
 -- After the import, there are two tables AIS_DEMO.AIS_2017 and AIS_DEMO.AIS_2017_06

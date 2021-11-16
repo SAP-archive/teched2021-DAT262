@@ -133,8 +133,8 @@ BEGIN
 	RETURN SELECT :v."ID", :VERTEX_ORDER FOREACH v IN Vertices(:p) WITH ORDINALITY AS VERTEX_ORDER;
 END;
 
-SELECT * FROM "AIS_DEMO"."F_SHORTEST_PATH"(29117, 28448, 0.4) AS P LEFT JOIN "AIS_DEMO"."ROUTE_NETWORK_VERTICES" AS V ON P.ID = V.ID;
-
+SELECT * FROM "AIS_DEMO"."F_SHORTEST_PATH"(i_startVertex => 29117, i_endVertex => 28448, i_cargoFactorWeight => 0.4) AS P 
+	LEFT JOIN "AIS_DEMO"."ROUTE_NETWORK_VERTICES" AS V ON P.ID = V.ID;
 
 
 -- Wrap the function call in a view, so we can display the data in QGIS

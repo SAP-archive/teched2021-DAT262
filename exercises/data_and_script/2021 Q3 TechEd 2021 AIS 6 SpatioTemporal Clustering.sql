@@ -88,7 +88,7 @@ BEGIN
 END;
 
 -- Call the function - hte first parameter is the number of grid cells in X direction, the second is a time interval definition 
-SELECT * FROM "AIS_DEMO"."F_CREATE_ST_CUBE"(30, 'INTERVAL 1 DAY') ORDER BY "CLUSTER_ID", "ELEMENT_NUMBER";
+--SELECT * FROM "AIS_DEMO"."F_CREATE_ST_CUBE"(30, 'INTERVAL 1 DAY') ORDER BY "CLUSTER_ID", "ELEMENT_NUMBER";
 
 
 

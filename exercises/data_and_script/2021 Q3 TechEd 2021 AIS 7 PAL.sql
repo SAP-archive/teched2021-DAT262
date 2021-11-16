@@ -30,7 +30,7 @@ SELECT "ELEMENT_NUMBER", "START_TS", SUM("COU"), SUM("COU_DIST"), COUNT(*) AS "N
 /*****************************/
 -- For the sake of simplicity, we create a view on top of or ST_CUBE to expose the data to Predictive Analysis Library (PAL)
 -- We want to forecast observations for each cluster cell.
--- Each cluster cell has 365 timeslices, representing the observation in a 4h interval
+-- Each cluster cell has 365 timeslices, representing the observations in a 4h interval
 -- We use PAL (Massive) Unified Exponential Smoothing for timeseries forecasting, in specific (Massive) Auto Exponential Smoothing
 CREATE OR REPLACE VIEW "AIS_DEMO"."UES_DATA" AS (
 	SELECT "CLUSTER_ID", "ELEMENT_NUMBER", "COU_DIST" AS "OBSERVED_VALUE", "SHAPE", "START_TS" FROM "AIS_DEMO"."ST_CUBE"
@@ -47,7 +47,7 @@ DO BEGIN
 	-- declare parameters
 	DECLARE lt_param0 TABLE("PARAM_NAME" VARCHAR (100), "INT_VALUE" INTEGER, "DOUBLE_VALUE" DOUBLE, "STRING_VALUE" VARCHAR (100));
 	:lt_param0.INSERT(( 'FUNCTION', NULL, NULL,'MAESM'), 1);
-    :lt_param0.INSERT(( 'THREAD_RATIO', NULL, 1.0, NULL), 2);
+    :lt_param0.INSERT(( 'THREAD_RATIO', NULL, 5.0, NULL), 2);
     :lt_param0.INSERT(( 'FORECAST_NUM', 12, NULL, NULL), 3); 
     :lt_param0.INSERT(( 'MODELSELECTION', 1, NULL, NULL), 4); 
     :lt_param0.INSERT(( 'MAX_ITERATION', 500, NULL, NULL), 5);
@@ -79,7 +79,7 @@ CREATE OR REPLACE VIEW "AIS_DEMO"."V_UES_FORECAST" AS (
 		FROM SERIES_GENERATE_TIMESTAMP('INTERVAL 4 HOUR', '2017-05-01 00:00:00', '2017-07-07 24:00:00') AS T) AS TSERIES
 		ON FORC."ELEMENT_NUMBER" = TSERIES."ELEMENT_NUMBER"
 );
-SELECT * FROM "AIS_DEMO"."V_UES_FORECAST" ORDER BY CLUSTER_ID;
+--SELECT * FROM "AIS_DEMO"."V_UES_FORECAST" ORDER BY CLUSTER_ID;
 SELECT * FROM "AIS_DEMO"."V_UES_FORECAST" WHERE CLUSTER_ID IN (562) ORDER BY ELEMENT_NUMBER DESC;
 
 -- Depending on the data in each timeseries, not all forecasts might be complete.
