@@ -7,13 +7,13 @@ This repository contains the material for the SAP TechEd 2021 session DAT262 - U
 ## Overview
 
 This session introduces attendees to the **multi-model** capabilities in SAP HANA Cloud. We will mainly work with data from the Automatic Identification System (**AIS**), which is basically observations in space and time. In specific, we will process AIS vessel data provided by [https://marinecadastre.gov/ais/](https://marinecadastre.gov/ais/). Files covering two months of "Zone 16" (Chicago, Great Lakes) are imported into SAP HANA Cloud and Lon/Lat coordinates are converted to a "real" point geometry.</br>
-In exercises 1-3, the data is processed using standard SQL/**spatial functions** to
-- check which vessels were crossing boundaries of a national park (1)
-- derive motion statistics and trajectories of individual vessels (2)
-- aggregate observations using spatial clustering techniques (3)
+In exercises 2-4, the data is processed using standard SQL/**spatial functions** to
+- check which vessels were crossing boundaries of a national park (2)
+- derive motion statistics and trajectories of individual vessels (3)
+- aggregate observations using spatial clustering techniques (4)
 
-We will then calculate routes using **graph capabilities** (4). The exercise includes a simulated blockage of a ship canal and the identification of a suitable alternative route.</br>
-In exercise 5 and 6, we will show how to use an extension of spatial clustering to derive a "Space-Time Cube". The resulting dataset is then used to forecast traffic (7) on the lake using HANA's built-in "Predictive Analysis Library" (**PAL**).</br>
+We will then calculate routes using **graph capabilities** (5). The exercise includes a simulated blockage of a ship canal and the identification of a suitable alternative route.</br>
+In exercise 6, we will show how to use an extension of spatial clustering to derive a "Space-Time Cube". The resulting dataset is then used to forecast traffic (7) on the lake using HANA's built-in "Predictive Analysis Library" (**PAL**).</br>
 **Enterprise Search** is the topic of exercise 8. We will create a search model, run some search queries, and see the search UI.
 Finally, **Document Store** is leveraged in exercise 9 to ingest data from [GDELT's Global Entity Graph](https://blog.gdeltproject.org/announcing-the-global-entity-graph-geg-and-a-new-11-billion-entity-dataset/) and subsequently create a graph workspace which we can use for visualization.
 
