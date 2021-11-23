@@ -4,7 +4,7 @@ In this exercise, we make use of the HANA Graph engine to find suitable routes f
 
 ## Generate a Network for Path Finding<a name="subex1"></a>
 
-Our Network/Graph is made of vertices and edges. First we create the vertices. For this, we basically just take the results of a spatial clustering query.
+Our Network/Graph is made of vertices and edges. First we create the vertices. For this, we basically just take the results of a spatial clustering query. So the network's vertices are hexagons tessellating the plane.
 
 ```SQL
 -- Let's make a network/graph on which we can calculate routes.
@@ -50,52 +50,14 @@ The network vertices table now contains the following data: each vertex is repre
 
 ![](images/vertices.png)
 
-Next, we need to create the edges between the vertices, so we have a network on which we can route. As of today, this is a little tricky (but things will improve in the future). We will use a generic parameterized view to generate edges for a given grid size.
+Next, we need to create the edges between the vertices, so we have a network on which we can route. For each hexagon we will create an edge that connects it to its (up to 6) neighbors. An easy way to detect the neighbors is by using the ST_WithinDistance() predicate - we just need to find out the spatial distance between the hexagon centroids.
 
 ```SQL
--- We can  construct the edges between the cluster cells. The query below identifies the neighbors of each cluster cell.
-CREATE OR REPLACE VIEW "AIS_DEMO"."V_HEX_CLUSTER_NEIGHBORS" (IN i_x INT, IN i_y INT) AS
-WITH C AS (
-	SELECT ELEMENT_NUMBER FROM SERIES_GENERATE_INTEGER(1, 1, :i_x+1)
-	)
-	SELECT * FROM (
-		SELECT TWO_ROWS."SOURCE"+ALL_ROWS."OFFSET"*:i_x AS "SOURCE", TWO_ROWS."TARGET"+ALL_ROWS."OFFSET"*:i_x AS "TARGET", TWO_ROWS."NEI", TWO_ROWS."ROW_NO"+ALL_ROWS."OFFSET" AS "ROW_NO" FROM (
-			SELECT "SOURCE", "TARGET", "NEI", 1 AS "ROW_NO" FROM (
-				SELECT ELEMENT_NUMBER AS "SOURCE", ELEMENT_NUMBER-1 AS "TARGET", 'left' AS "NEI" FROM C WHERE ELEMENT_NUMBER > 1
-				UNION
-				SELECT ELEMENT_NUMBER AS "SOURCE", ELEMENT_NUMBER+1 AS "TARGET", 'right' AS "NEI" FROM C WHERE ELEMENT_NUMBER < :i_x
-				UNION
-				SELECT ELEMENT_NUMBER AS "SOURCE", ELEMENT_NUMBER+:i_x-1 AS "TARGET", 'left upper' AS "NEI" FROM C WHERE ELEMENT_NUMBER > 1
-				UNION
-				SELECT ELEMENT_NUMBER AS "SOURCE", ELEMENT_NUMBER+:i_x AS "TARGET", 'right upper' AS "NEI" FROM C
-				UNION
-				SELECT ELEMENT_NUMBER AS "SOURCE", ELEMENT_NUMBER-:i_x-1 AS "TARGET", 'left lower' AS "NEI" FROM C WHERE ELEMENT_NUMBER > 1
-				UNION
-				SELECT ELEMENT_NUMBER AS "SOURCE", ELEMENT_NUMBER-:i_x AS "TARGET", 'right lower' AS "NEI" FROM C
-			) AS UNEVEN_ROW -- start with 1
-			UNION
-			SELECT "SOURCE", "TARGET", "NEI", 2 AS "ROW_NO" FROM (
-				SELECT ELEMENT_NUMBER+:i_x AS "SOURCE", ELEMENT_NUMBER+:i_x-1 AS "TARGET", 'left' AS "NEI" FROM C WHERE ELEMENT_NUMBER > 1
-				UNION
-				SELECT ELEMENT_NUMBER+:i_x AS "SOURCE", ELEMENT_NUMBER+:i_x+1 AS "TARGET", 'right' AS "NEI" FROM C WHERE ELEMENT_NUMBER < :i_x
-				UNION
-				SELECT ELEMENT_NUMBER+:i_x AS "SOURCE", ELEMENT_NUMBER+:i_x+:i_x AS "TARGET", 'left upper' AS "NEI" FROM C
-				UNION
-				SELECT ELEMENT_NUMBER+:i_x AS "SOURCE", ELEMENT_NUMBER+:i_x+:i_x+1 AS "TARGET", 'right upper' AS "NEI" FROM C WHERE ELEMENT_NUMBER < :i_x
-				UNION
-				SELECT ELEMENT_NUMBER+:i_x AS "SOURCE", ELEMENT_NUMBER+:i_x-:i_x AS "TARGET", 'left lower' AS "NEI" FROM C
-				UNION
-				SELECT ELEMENT_NUMBER+:i_x AS "SOURCE", ELEMENT_NUMBER+:i_x-:i_x+1 AS "TARGET", 'right lower' AS "NEI" FROM C WHERE ELEMENT_NUMBER < :i_x
-			) AS EVEN_ROW -- start with 1
-		) AS TWO_ROWS
-		LEFT JOIN 	
-		(SELECT "GENERATED_PERIOD_START" AS "OFFSET" FROM SERIES_GENERATE_INTEGER(2, 0, :i_y+1)) AS "ALL_ROWS" ON 1=1
-	)
-	WHERE "TARGET" > 0 AND "TARGET" <= :i_x*:i_y AND "SOURCE" <= :i_x*:i_y
-;
+SELECT ST_GEOMFROMWKT('POINT('||YMIN||' '||X||')', 32616).ST_DISTANCE(ST_GEOMFROMWKT('POINT('||YMAX||' '||X||')', 32616),'meter')/400 AS "CELL_DISTANCE"
+		FROM (SELECT MIN("CENTROID".ST_Y()) AS YMIN, MIN("CENTROID".ST_X()) AS X, MAX("CENTROID".ST_Y()) AS YMAX FROM "AIS_DEMO"."ROUTE_NETWORK_VERTICES");
 ```
 
-With this view, we can generate the edges connecting two adjacent hexagons and store them in the table `ROUTE_NETWORK_EDGES`. The edges have attributes which we will use for path finding later, e.g. the `AVG_CARGO_TRANSIT_COST_FACTOR`, which is the average of the `CARGO_TRANSIT_COST_FACTOR` assigned to the source and target vertex.
+The result is ~1321 m. Now we can use this distance to identify each hexagon's neighbors and generate the edges connecting two adjacent hexagons and store them in the table `ROUTE_NETWORK_EDGES`. The edges have attributes which we will use for path finding later, e.g. the `AVG_CARGO_TRANSIT_COST_FACTOR`, which is the average of the `CARGO_TRANSIT_COST_FACTOR` assigned to the source and target vertex.
 
 ````SQL
 -- Create the edges table
@@ -111,17 +73,18 @@ CREATE COLUMN TABLE "AIS_DEMO"."ROUTE_NETWORK_EDGES" (
 	"AVG_CARGO_TRANSIT_COST_FACTOR" DOUBLE DEFAULT 1.0,
 	"BLOCKED" BOOLEAN DEFAULT FALSE
 );
--- and fill edges table
+-- ... and fill edges table
 INSERT INTO "AIS_DEMO"."ROUTE_NETWORK_EDGES"("SOURCE", "TARGET", "LINE_32616", "LENGTH", "AVG_C", "AVG_SHIPS", "AVG_SOG", "AVG_CARGO_TRANSIT_COST_FACTOR")
-	SELECT "SOURCE", "TARGET", ST_MAKELINE(C1."CENTROID", C2."CENTROID") AS "LINE_32616",
-		ST_MAKELINE(C1."CENTROID", C2."CENTROID").ST_LENGTH() AS "LENGTH",
-		(C1."C" + C2."C")/2 AS "AVG_C",
-		(C1."SHIPS" + C2."SHIPS")/2 AS "AVG_SHIPS",
-		(C1."SOG" + C2."SOG")/2 AS "AVG_SOG",
-		(C1."CARGO_TRANSIT_COST_FACTOR" + C2."CARGO_TRANSIT_COST_FACTOR")/2 AS "AVG_CARGO_TRANSIT_COST_FACTOR"
-	FROM "AIS_DEMO"."V_HEX_CLUSTER_NEIGHBORS"(400, 388) AS E -- take result from query above as size of the grid
-	INNER JOIN "AIS_DEMO"."ROUTE_NETWORK_VERTICES" AS C1 ON E."SOURCE" = C1."ID"
-	INNER JOIN "AIS_DEMO"."ROUTE_NETWORK_VERTICES" AS C2 ON E."TARGET" = C2."ID";
+	SELECT T1.ID AS "SOURCE", T2.ID AS "TARGET", ST_MAKELINE(T1."CENTROID", T2."CENTROID") AS "LINE_32616",
+		CASE WHEN T1.ID != T2.ID THEN ST_MAKELINE(T1."CENTROID", T2."CENTROID").ST_LENGTH() ELSE 0 END AS "LENGTH",
+		(T1."C" + T2."C")/2 AS "AVG_C",
+		(T1."SHIPS" + T2."SHIPS")/2 AS "AVG_SHIPS",
+		(T1."SOG" + T2."SOG")/2 AS "AVG_SOG",
+		(T1."CARGO_TRANSIT_COST_FACTOR" + T2."CARGO_TRANSIT_COST_FACTOR")/2 AS "AVG_CARGO_TRANSIT_COST_FACTOR"
+		FROM "AIS_DEMO"."ROUTE_NETWORK_VERTICES" AS T1, "AIS_DEMO"."ROUTE_NETWORK_VERTICES" AS T2
+		WHERE T1."CENTROID".ST_WITHINDISTANCE(T2."CENTROID", 1321*1.5, 'meter') = 1;
+-- ... and remove self edges
+DELETE FROM "AIS_DEMO"."ROUTE_NETWORK_EDGES" WHERE "SOURCE" = "TARGET";
 
 SELECT MIN("AVG_CARGO_TRANSIT_COST_FACTOR"),MAX("AVG_CARGO_TRANSIT_COST_FACTOR") FROM "AIS_DEMO"."ROUTE_NETWORK_EDGES";
 ````
