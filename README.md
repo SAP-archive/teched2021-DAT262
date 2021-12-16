@@ -4,6 +4,8 @@
 
 This repository contains the material for the SAP TechEd 2021 session DAT262 - Unlock Value and Gain Deep Insights from Your Data with SAP HANA Cloud.  
 
+The [replay of the session](https://reg.sapevents.sap.com/flow/sap/sapteched2021/portal/page/sessions/session/16303673678070013g5d) held on Nov. 17th 2021 can be found on the TechEd 2021 website.
+
 ## Overview
 
 This session introduces attendees to the **multi-model** capabilities in SAP HANA Cloud. We will mainly work with data from the Automatic Identification System (**AIS**), which is basically observations in space and time. In specific, we will process AIS vessel data provided by [https://marinecadastre.gov/ais/](https://marinecadastre.gov/ais/). Files covering two months of "Zone 16" (Chicago, Great Lakes) are imported into SAP HANA Cloud and Lon/Lat coordinates are converted to a "real" point geometry.</br>
