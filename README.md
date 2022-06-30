@@ -1,3 +1,5 @@
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/teched2021-DAT262)](https://api.reuse.software/info/github.com/SAP-samples/teched2021-DAT262)
+
 # DAT262 - Unlock Value and Gain Deep Insights from Your Data with SAP HANA Cloud
 
 ## Description
